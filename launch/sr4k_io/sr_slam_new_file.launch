@@ -1,0 +1,55 @@
+<launch>
+
+<node pkg="sr_slam" type="sr_publisher" name="sr_publisher" output="log">
+  <param name="sr_source"                     value="SR_FILE"/> <!--value="SR_FILE", "SR_CAM" "SR_TCP"/-->
+  <param name="sr_publish_rate"               value="10"/> <!-- publish rate hz-->
+  <param name="sr_publish_max"                value="-1"/> <!-- publish max -->
+
+  <!-- SR_FILE parameters -->
+  <!--param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/try"/-->
+  <!--param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp2_etas523_hallway_exp3"/-->
+  <!--param name="sr_data_file_dir"                 value="/home/davidz/work/data/SwissRanger4000/workstation_8.10.2014"/-->
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_22"/>
+
+  <param name="sr_start_frame"                value="1"/>
+  <param name="sr_end_frame"                  value="400"/>
+  <param name="sr_new_file_version"           value="true"/>
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/>
+
+</node>
+
+<node pkg="vis_navigation" type="vis_navigation" name="slam_ui" output="log">
+  <param name="bg_img_name"                   value="/home/davidz/work/ros_hydro_ws/devel/lib/vis_navigation/Floor5_ETASS.png"/>
+</node>
+
+<node pkg="sr_slam" type="sr_main" name="sr_slam" output="log">
+  <param name="config/fixed_frame_name"       value="/map"/>
+  <param name="config/base_frame_name"        value=""/>
+  <param name="config/bagfile_name"           value=""/>
+  
+  <!-- imu initial data -->
+  <param name="config/imu_roll"               value="0"/> <!-- -1 means to retrieve imu data from the device -->
+  <param name="config/imu_pitch"              value="0"/> <!-- 3.579 0.43536-->
+
+  <!-- Visual Features, to activate GPU-based features see CMakeLists.txt -->
+  <param name="config/feature_detector_type"         value="SIFTGPU"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/feature_extractor_type"        value="SIFTGPU"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/min_keypoints"                 value="50"/><!-- Extract no less than this many ... -->
+  <param name="config/min_matches"                   value="10"/> <!-- Minimal number of matched features before RANSAC 29? -->
+  <param name="config/nn_distance_ratio"                    value="0.95"/> <!-- 0.5 Feature correspondence is valid if distance to nearest neighbour is smaller than this parameter times the distance to the 2nd neighbour. This needs to be 0.9-1.0 for SIFTGPU w/ FLANN, since SIFTGPU Features are normalized-->
+
+  <param name="config/max_dist_for_inliers"         value="9" /> <!-- 6 3 "Mahalanobis distance for matches to be considered inliers by ransac"-->
+  <param name="ransac_iterations"                   value="200" /> <!-- "Number of iterations for registration" -->
+
+  <!-- Algortithm settings -->
+  <param name="config/min_translation_meter"         value="0.05"/><!-- frames with motion less than this, will be omitted -->
+  <param name="config/min_rotation_degree"           value="2"/><!-- frames with motion less than this, will be omitted -->
+  <param name="config/predecessor_candidates"        value="10"/><!-- 5 search through this many immediate predecessor nodes for corrspondences -->
+  <param name="config/neighbor_candidates"           value="0"/><!-- 5 search through this many graph neighbour nodes for corrspondences -->
+  <param name="config/min_sampled_candidates"        value="0"/><!-- 5 search through this many uniformly sampled nodes for corrspondences -->
+  <param name="config/max_connections"               value="5"/><!-- 10 -1 stop after this many succesfully found spation relations -->
+</node>
+
+
+</launch>

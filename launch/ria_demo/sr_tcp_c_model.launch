@@ -1,0 +1,28 @@
+<launch>
+
+<node pkg="sr_slam" type="sr_publisher" name="sr_publisher" output="log">
+  <param name="sr_source"                     value="SR_TCP"/> <!--value="SR_FILE", "SR_CAM" "SR_TCP"/-->
+  <param name="sr_publish_rate"               value="20"/> <!-- publish rate hz-->
+  <param name="sr_publish_max"                value="-1"/> <!-- publish max frames -->
+
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/>
+  <param name="sr_new_file_version"           value="true"/> <!-- true -->
+
+  <!-- SR_TCP parameters -->
+
+  <param name="sr_server_ip"                     value="192.168.1.4"/>
+
+  <!-- param name="sr_server_ip"                     value="192.168.100.2"/-->
+
+  <param name="sr_server_port_id"                value="27015"/> 
+  
+  <!-- weather and where to record sr_files -->
+  <param name="sr_record_exp_data"            value="1"/>
+  <param name="sr_record_dir"                 value="/home/davidz/work/data/SwissRanger4000/exp"/> 
+
+</node>
+
+
+
+</launch>

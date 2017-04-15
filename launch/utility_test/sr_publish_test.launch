@@ -1,0 +1,23 @@
+<launch>
+
+<node pkg="sr_slam" type="sr_publisher" name="sr_publisher" output="screen">
+<!--node pkg="sr_slam" type="sr_pcl_show" name="pcl_show" output="screen"-->
+  <param name="sr_source"                     value="SR_FILE"/> <!--value="SR_FILE", "SR_CAM" "SR_TCP"/-->
+
+  <!--param name="sr_data_file_dir"              value="/home/davidz/work/EmbMess/mesa/pcl_mesa/build/bin/sr_data"/-->
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/try"/>
+  <param name="sr_start_frame"                value="1"/>
+  <param name="sr_end_frame"                  value="50"/>
+  
+  <param name="sr_new_file_version"           value="false"/>
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/>
+
+  <param name="sr_cam_ip"                     value="192.168.0.11"/>
+  <param name="sr_cam_it"                     value="30"/>
+</node>
+
+<node pkg="sr_slam" type="sr_subscriber" name="sr_listener" output="screen">
+</node>
+
+</launch>

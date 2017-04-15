@@ -1,0 +1,14 @@
+
+<launch>
+
+<node pkg="lsd_slam_viewer" type="viewer" name="viewer" output="screen" args="">
+</node>
+
+<arg name="data_dir" default="/media/work/3rdlibs/lsd_slam_noros-master/dataset/LSD_room_images/LSD_room"/>
+
+<node pkg="lsd_slam_core" type="dataset" name="LSD_SLAM" output="screen">
+  <param name="~calib"    value="$(arg data_dir)/cameraCalibration.cfg"/>
+  <param name="~files"    value="$(arg data_dir)/images"/>
+</node>
+
+</launch>

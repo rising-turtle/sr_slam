@@ -1,0 +1,18 @@
+<launch>
+  
+  <include file="../sr4k_io/sr_publish_img_dpt.launch">
+    <arg name="sr_source" value="SR_CAM"/>
+    <arg name="sr_publish_max"  value="5000"/>
+    <arg name="sr_cam_it"     value="30"/>
+    <arg name="sr_syn_from_receiver" value="false"/>
+  </include>
+
+  <include file="cameracalibrator.launch">
+    <arg name="map_to" value="/sr_img_raw"/>
+    <arg name="calib_file" value="PtamFixParams.yaml"/>
+  </include>
+
+  
+
+
+</launch>

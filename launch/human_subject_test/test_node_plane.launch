@@ -1,0 +1,118 @@
+<launch>
+
+<node pkg="sr_slam" type="sr_publisher" name="sr_publisher" output="log">
+  <param name="sr_source"                     value="SR_FILE"/> <!--value="SR_FILE", "SR_CAM" "SR_TCP"/-->
+  <param name="sr_publish_rate"               value="10"/> <!-- 10 publish rate hz-->
+  <param name="sr_publish_max"                value="-1"/> <!-- publish max -->
+
+  <!-- SR_FILE parameters -->
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_21"/>
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_82"/> <!-- 80+ -->
+  <!-- param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_1"/-->
+
+  <param name="sr_start_frame"                value="1"/>
+  <param name="sr_end_frame"                  value="2230"/> <!-- 3130 -->
+  <param name="sr_new_file_version"           value="false"/> <!-- true -->
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/>
+
+</node>
+
+<node pkg="vis_navigation" type="vis_navigation" name="slam_ui" output="log">
+  <!-- param name="start_u"                       value="760" -->
+  <!-- param name="start_v"                       value="990" -->
+  <param name="start_u"                       value="2680" />  <!-- 760 -->
+  <param name="start_v"                       value="550" /> <!-- 1150 -->
+  <param name="u_resolution"                  value="0.01960243"/>
+  <param name="v_resolution"                  value="0.01960243"/>
+  <param name="demo_place"                    value="eit_f5"/> <!-- default: etas_f5 -->
+  
+  <!-- trajectory display setting -->
+  <param name="display_rgbd_traj"             value="false" />
+
+  <!-- large transformation thresholds -->
+  <param name="large_x_threshold"             value="60"/>
+  <param name="large_y_threshold"             value="140"/>
+  <!-- param name="large_theta_threshold"     value="2"/ -->
+
+  <param name="record_pos_2D"                 value="false"/> <!-- whether to record pos msg from rgbdslam -->
+
+  <!-- mapping_rule = 1, -M_PI/2, mapping_rule = 2, 0, mapping_rule = 3, M_PI/2 -->
+  <!-- param name="init_heading"                  value="0" --> <!-- default: -M_PI/2 -->
+  <param name="init_heading"                  value="-1.570796327"/> <!--  3.141592654 default: -M_PI/2 -->
+
+  <param name="bg_img_name"                   value="/home/davidz/work/ros_hydro_ws/devel/lib/vis_navigation/EIT_Building_Floor5_2.png"/>
+  <!-- line extractor parameters -->
+  <param name="number_of_points"              value="50"/>  <!-- the minimal number of points in a line -->
+  <param name="min_hist_delete"               value="15"/>   <!-- 5 threshold for deleting points-->
+  <param name="min_hist_thre"                 value="45"/>  <!-- 15 threshold for hist filter --> 
+  <param name="min_line_length"               value="10000"/> <!-- 4000 10000 = 100^2, 100*0.02 = 2m sq of the minimal line length -->
+
+  <!-- save hist and line points -->
+  <param name="save_hist_points"              value="false"/>
+</node>
+
+<node pkg="sr_slam" type="sr_main" name="sr_slam" output="log">
+  <param name="config/b_add_floor_into_graph"   value="true"/> <!-- true -->
+  <param name="config/fixed_frame_name"       value="/map"/>
+  <param name="config/base_frame_name"        value=""/>
+  <param name="config/bagfile_name"           value=""/>
+
+  <!-- select one mapping rule from 3D to 2D map  -->
+  <param name="config/mapping_rule"           value="4"/>
+
+  <!-- use mininal distance to delete points too near -->
+  <param name="config/min_distance_thre"      value="0.5"/>
+
+  <!-- keep good nodes, try to maintain the process if vro fails -->
+  <param name="config/keep_good_nodes"        value="true"/>
+
+  <!-- display the 3D map, and reproject 2D point -->
+  <param name="config/store_pointclouds"      value="true"/> 
+  <param name="config/visualize_keyframes_only" value="true"/>
+  <param name="config/glwidget_without_clouds" value="false"/>
+  <param name="config/send_2_vis"                    value="true"/>
+  <param name="config/send_pc2_vis"           value="true"/>
+
+  <!-- imu initial data -->
+  <param name="config/imu_roll"               value="0"/> <!-- -1 means to retrieve imu data from the device -->
+  <param name="config/imu_pitch"              value="0"/> <!-- 3.579 0.43536-->
+
+  <!-- sift and siftgpu parameters -->
+  <param name="sift_num_features"                   value="0" /> <!-- number of returned sift features -->
+  <param name="sift_octave_layers"                  value="5" /> <!-- number octave layers -->
+  <param name="sift_contrast_threshold"             value="0.04" /> <!-- initial threshold for keypint detection -->
+  <param name="siftgpu_contrast_threshold"          value="0.0010" /> <!--0.0008 0.0018 initial DOG threshold for siftgpu -->
+  <param name="siftgpu_edge_threshold"              value="10." /> <!-- edge threshold for siftgpu  -->
+
+  <!-- filters that used for the intensity img -->
+  <param name="config/use_gaussian_filter"      value="false"/>
+
+  <!-- Visual Features, to activate GPU-based features see CMakeLists.txt -->
+  <param name="config/feature_detector_type"         value="SIFTGPU"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/feature_extractor_type"        value="SIFTGPU"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/min_keypoints"                 value="50"/><!-- Extract no less than this many ... -->
+  <param name="config/min_matches"                   value="10"/> <!-- Minimal number of matched features before RANSAC 29? -->
+  <param name="config/nn_distance_ratio"                    value="0.95"/> <!-- 0.5 Feature correspondence is valid if distance to nearest neighbour is smaller than this parameter times the distance to the 2nd neighbour. This needs to be 0.9-1.0 for SIFTGPU w/ FLANN, since SIFTGPU Features are normalized-->
+  
+  <!-- max rotation and translation for a VO match between two frames -->
+  <param name="config/max_rotation_degree"          value="90"/> 
+  <param name="config/max_translation_meter"        value="1.5"/>
+
+  <param name="config/vro_strategy"                 value="vro_my" /> <!-- " VRO strategy: VRO_ori, VRO_my, VRO_plane, VRO_plane_em" -->
+  <param name="config/max_dist_for_inliers"         value="0.05" /> <!--9 6 3 "Mahalanobis distance for matches to be considered inliers by ransac"-->
+  <param name="config/ransac_iterations"            value="1000" /> <!-- "Number of iterations for registration" -->
+  <param name="config/b_ransac_fixed_iter"          value="false"/> <!-- weather to use fixed   -->
+
+  <!-- Algortithm settings -->
+  <param name="config/min_translation_meter"         value="0.05"/><!-- 0.05  frames with motion less than this, will be omitted -->
+  <param name="config/min_rotation_degree"           value="2"/><!-- 2 frames with motion less than this, will be omitted -->
+  <param name="config/predecessor_candidates"        value="5"/><!-- 10 search through this many immediate predecessor nodes for corrspondences -->
+  <param name="config/neighbor_candidates"           value="0"/><!-- 5 search through this many graph neighbour nodes for corrspondences -->
+  <param name="config/min_sampled_candidates"        value="0"/><!-- 5 search through this many uniformly sampled nodes for corrspondences -->
+  <param name="config/max_connections"               value="5"/><!-- 10 -1 stop after this many succesfully found spation relations -->
+  <param name="config/optimizer_skip_step"           value="20"/> <!-- optimize every n-th frame, negative means offline optimization -->
+</node>
+
+
+</launch>

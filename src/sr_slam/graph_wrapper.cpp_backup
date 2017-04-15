@@ -1,0 +1,600 @@
+#include "graph_wrapper.h"
+#include "misc.h"         // eigenTransf2TF
+#include <cmath>
+#include <std_msgs/Float32MultiArray.h>
+#include "NodeWrapper.h"
+#include "plane_extract.h"
+#include "paramSrvMi.h"
+#include "pcl_ros/transforms.h"
+#include <pcl/common/transforms.h>
+#include "global_def.h"
+#include <string>
+
+CGraphWrapper::CGraphWrapper()
+{
+  // declare robot pos publisher 
+  ros::NodeHandle n; 
+  r_pos_pub_ = n.advertise<std_msgs::Float32MultiArray>("/robot_pos", 10);
+  
+  // call back of save g2o graph 
+  // graph_save_sub_ = nh.subscribe("/save_graph", 1, CGraphWrapper::);  // save graph structure
+  r_pos2D_sub_ = new message_filters::Subscriber<std_msgs::Float32MultiArray>(n, "/robot_pos_2d_back", 1); 
+  r_pos2D_sub_->registerCallback(boost::bind(&CGraphWrapper::robotPos2DCallBack, this, _1));
+}
+
+void CGraphWrapper::saveG2OGraph(QString filename)
+{ 
+   string pos2D_fname(qPrintable(filename)); 
+   pos2D_fname += string("_pos2D"); 
+   ofstream pos2D_fout(pos2D_fname); 
+   ROS_ERROR("graph_wrapper.cpp: in saveG2OGraph(), pos2D_fname = %s, pos2D_fout has %d members", pos2D_fname.c_str(), pos2D_pool_.size());
+
+   if(pos2D_fout.is_open())
+   {
+     map<int, vector< float> >::iterator it = pos2D_pool_.begin();
+     while(it!= pos2D_pool_.end())
+     {
+       vector<float>& pos2D = it->second; 
+       pos2D_fout<<it->first<<" "<<pos2D[0]<<" "<<pos2D[1]<<" "<<pos2D[2]<<endl;
+       ++it;
+     }
+     pos2D_fout.close();
+   }
+  
+   // transform the position of the vertex into global coordinate reference 
+   map<int, Node*>::iterator it = graph_.begin(); 
+   while(it != graph_.end())
+   {
+      g2o::VertexSE3* v = dynamic_cast<g2o::VertexSE3*>(optimizer_->vertex(it->second->vertex_id_));
+      tf::Transform T_o2c = eigenTransf2TF(v->estimate());
+      tf::Transform T_g2c = T_g2o_ * T_o2c; 
+      v->setEstimate(tf2G2O(T_g2c));
+      ++it; 
+   }
+
+   return GraphManager::saveG2OGraph(filename);
+}
+
+CGraphWrapper::~CGraphWrapper()
+{
+  r_pos_pub_.shutdown();
+}
+
+int CGraphWrapper::graph_size()
+{
+  return graph_.size();
+}
+
+bool CGraphWrapper::nodeComparisons(Node* newNode, 
+                         QMatrix4x4& curr_motion_estimate,
+                         bool& edge_to_keyframe)
+{
+  return GraphManager::nodeComparisons(newNode, curr_motion_estimate, edge_to_keyframe);
+} 
+
+void CGraphWrapper::robotPos2DCallBack(const std_msgs::Float32MultiArray::ConstPtr& r_pos2d_ptr)
+{
+  const float * pf = r_pos2d_ptr->data.data(); 
+  int node_id = (int)(*pf); 
+  vector<float> pose2d(3);
+  pose2d[0] = *(pf+1);  pose2d[1] = *(pf+2); pose2d[2] = *(pf+3); 
+  
+  // from 2D image coordinate reference to global coordinate 
+  float& gx = pose2d[0]; 
+  float& gy = pose2d[1]; 
+  float& gth = pose2d[2];
+  if(mapping_rule_select_ == 4)
+  {
+    //    image reference           rule 4 reference 
+    //    o -------x               x ------ o
+    //      |                             |
+    //      |                             |
+    //      y                             y
+    gx = -gx;   gy = gy;  
+    // ROS_ERROR("graph_wrapper.cpp: before gth = %f ", R2D(gth)); 
+    gth = (gth * -1) - M_PI;
+    // ROS_ERROR("graph_wrapper.cpp: after gth = %f", R2D(gth));
+    gth = normAngle(gth, -M_PI);
+  }// TODO 
+  else 
+  {
+    // rule 1-3
+  }
+  pos2D_pool_[node_id] = pose2d; 
+  // ROS_ERROR("graph_wrapper.cpp: receive pose_id: %d, at %f %f %f", node_id, pose2d[0], pose2d[1], pose2d[2]);
+}
+
+bool CGraphWrapper::addNode(Node* new_node)
+{
+  bool ret = GraphManager::addNode(new_node);
+  if(ret)
+  {
+    if(graph_size() == 1) // it's the first node 
+    {
+      firstNode(new_node);  // we will add extra stuff for the first node
+    }
+    // ROS_WARN("graph_wrapper.cpp: succeed to addNode, then publish it!"); 
+    ParamSrvMi* ps = ParamSrvMi::instanceMi();
+    if(ps->get<bool>("send_2_vis"))
+      publish2D(new_node);
+    if(ps->get<bool>("save_added_node"))
+      ((CNodeWrapper*)new_node)->write(ps->get<std::string>("save_node_path"));
+    // ROS_WARN("graph_wrapper.cpp: succeed to addNode, finish publish it!"); 
+  }
+  return ret; 
+}
+
+bool CGraphWrapper::firstNode(Node* new_node)
+{
+  
+}
+
+void CGraphWrapper::publish2D(Node* new_node)
+{
+    static const int nn = 4;  // x,z,theta,node_id
+    std_msgs::Float32MultiArray pos_msg; 
+    pos_msg.data.resize(4);     // x, y, theta, node_id there is coordinate translation  
+ 
+    // retrieve the position of current node 
+    g2o::VertexSE3* v = dynamic_cast<g2o::VertexSE3*>(optimizer_->vertex(new_node->vertex_id_));
+    tf::Transform tf_trans = eigenTransf2TF(v->estimate());
+    
+    // with IMU 
+    // tf::StampedTransform tf_trans = computeFixedToBaseTransform(new_node, false);
+    
+    // do not do this, just transform the coordinate reference into global, from camera to global 
+    //            z                            z   x
+    //           /                             |  /
+    //          /                              | /
+    //         /----- x                 y ---- |/
+    //         |                             Global
+    //         |                                     
+    //         | y
+    //       Camera 
+
+    static tf::Transform T_g2b;                  // global to base 
+    static tf::Transform T_b2o;                  // base to original 
+    static tf::Transform T_o2c;                  // original to current camera 
+    static tf::Transform T_g2c;                  // global to current camera T_g2c = T_g2b * T_b2o * T_o2c; 
+
+    T_o2c = tf_trans;                            // camera position in the original reference
+
+    // Eigen matrix rotation 
+    CNodeWrapper* pn = dynamic_cast<CNodeWrapper*>(new_node);
+    static float pitch = 0; // pn->getPitch();
+    // static Eigen::Matrix4f R_original = Eigen::Matrix4f::Identity();
+    static float cp = cos(pitch); 
+    static float sp = sin(pitch);
+
+    // the coordinate of the floor, to delete points that belong to the floor
+    static float floor_y = 0; 
+    static float floor_z = 0;
+    static float floor_x = 0;
+    static tf::Vector3 floor_center; 
+    static float floor_level = -10;
+    static float floor_range = 0.1; // points above floor +floor_range be considered as floor 
+
+    if(graph_.size() == 1) // the first node, figure out the ground and the pitch 
+    {
+      // set T_g2b, from global to base 
+      tf::Matrix3x3 R_y;    // first, rotate along y 90'
+      R_y.setValue( 0, 0, 1, 
+                    0, 1, 0, 
+                    -1, 0, 0); 
+      tf::Matrix3x3 R_z; // second, rotate along z -90' 
+      R_z.setValue( 0, 1, 0, 
+                    -1, 0,  0,
+                    0, 0, 1);
+      T_g2b = tf::Transform(R_y*R_z);
+      /*
+      {
+      // for debug
+
+      tf::Vector3 t1 = T_g2b.getBasis()[0]; 
+      cerr<<"graph_wrapper.cpp row 1 : "<<t1.x()<<" "<<t1.y()<<" "<<t1.z()<<endl;
+      t1 = T_g2b.getBasis()[1];
+      cerr<<"graph_wrapper.cpp roa 2 : "<<t1.x()<<" "<<t1.y()<<" "<<t1.z()<<endl;
+      t1 = T_g2b.getBasis()[2];
+      cerr<<"graph_wrapper.cpp row 3 : "<<t1.x()<<" "<<t1.y()<<" "<<t1.z()<<endl;
+
+      t1 = tf::Vector3(1,2,3); 
+      t1 = T_g2b*t1; 
+      cerr<<"graph_wrapper.cpp t1 : "<<t1.x()<<" "<<t1.y()<<" "<<t1.z()<<endl;
+      }
+      */
+
+      // ROS_ERROR("graph_wrapper.cpp: start to extract floor!");
+      if(pn->pc_col->points.size() > 0) // store points 
+      {
+         CPlaneExtract<point_type> floor_extracter;
+         float tmp = floor_extracter.getPitchByGround(pn->pc_col);
+         if(tmp != 0) // succeed to set the pitch angle 
+         {
+            pitch = tmp; 
+            ROS_ERROR("graph_wrapper.cpp: compute the initial pitch angle: %f", R2D(tmp));
+            cp = cos(pitch); 
+            sp = sin(pitch); 
+            // cerr<<"cp: "<<cp<<" sp: "<<sp<<endl;
+            // cerr<<"R_original: "<<R_original<<endl;
+            
+            //   Swiss Ranger coordinate reference 
+            //          y   x
+            //          |  /
+            //          | /
+            //          |/____ z  
+
+            // this rotate around x-axis 
+            // R_original(1,1) = cp;   R_original(1,2) = -sp;
+            // R_original(2,1) = sp;   R_original(2,2) = cp;
+            // floor_y = floor_extracter.floor_y_; 
+            // floor_z = floor_extracter.floor_z_;
+            // floor_level = floor_z*sp + floor_y*cp; 
+            // ROS_ERROR("graph_wrapper.cpp: floor_y: %f floor_z: %f floor level: %f", floor_y, floor_z, floor_level);
+
+            //   Smart cane coordinate reference 
+            //          z   y
+            //          |  /
+            //          | /
+            //          |/____ x  
+
+            // this rotate around y-axis 
+            // R_original(2,2) = cp;   R_original(0,2) = -sp;
+            // R_original(2,0) = sp;   R_original(0,0) = cp;
+            // R_original = R_original.inverse().eval();
+            // cerr<<"R_inverse: "<<R_original<<endl;
+            // floor_z = floor_extracter.floor_z_; 
+            // floor_x = floor_extracter.floor_x_; 
+            // floor_level = floor_x*sp + floor_z*cp; 
+            // ROS_ERROR("graph_wrapper.cpp: floor_y: %f floor_z: %f floor level: %f", floor_y, floor_z, floor_level);
+
+            //   camera coordinate reference 
+            //             x
+            //            /
+            //           /
+            //          /____ z  
+            //          |
+            //          |
+            //          | y
+            // this rotate around x-axis 
+            tf::Matrix3x3 R_b2o;
+            // R_original(1,1) = cp;   R_original(1,2) = -sp;
+            // R_original(2,1) = sp;   R_original(2,2) = cp;
+            R_b2o.setValue(1, 0, 0, 
+                           0, cp, -sp, 
+                           0, sp, cp);
+
+            // T_b2o = eigenTransf2TF(R_original); // get transformation from base to origin 
+            T_b2o = tf::Transform(R_b2o);
+
+            // set floor center 
+            floor_z = floor_extracter.floor_z_; 
+            floor_y = floor_extracter.floor_y_;
+            floor_x = floor_extracter.floor_x_; 
+            floor_center.setValue(floor_x, floor_y, floor_z);
+            
+            floor_center = T_g2b*T_b2o*floor_center;
+            floor_level = floor_center.z();
+            ROS_ERROR("graph_wrapper.cpp: floor_z: %f floor level: %f", floor_center.z(), floor_level);
+
+            // R_original(1,1) = cp;   R_original(1,2) = sp;
+            // R_original(1,2) = -sp;   R_original(2,2) = cp;
+         }else
+         {
+            ROS_ERROR("graph_wrapper.cpp: failed to detect floor, set T_b2o = Identity!");
+            T_b2o = tf::Transform();
+         }
+         
+      }else{
+        ROS_ERROR("graph_wrapper.cpp: no point cloud avaliable, set T_b2o = Identity!");
+        T_b2o = tf::Transform();  
+      }
+      // ROS_ERROR("graph_wrapper.cpp: finish floor extraction!");
+      // now T_g2o_ is able to be determined 
+      T_g2o_ = T_g2b * T_b2o; 
+    }
+/*
+    int reproject_step = 150;
+    if(graph_.size() % reproject_step == 0)
+    {
+      ROS_ERROR("graph_wrapper.cpp: reproject step, recompute the Tb2o");
+      if(pn->pc_col->points.size() > 0) // store points 
+      {
+         CPlaneExtract<point_type> floor_extracter;
+         float tmp = floor_extracter.getPitchByGround(pn->pc_col);
+         float rad30 = D2R(30);
+         if(tmp != 0 && fabs(tmp) < rad30)  // succeed to set the pitch angle 
+         {
+            float pitch = tmp; 
+            ROS_ERROR("graph_wrapper.cpp: compute the initial pitch angle: %f", R2D(tmp));
+            float cp = cos(pitch); 
+            float sp = sin(pitch); 
+                 //   camera coordinate reference 
+            //             x
+            //            /
+            //           /
+            //          /____ z  
+            //          |
+            //          |
+            //          | y
+            // this rotate around x-axis 
+            tf::Matrix3x3 R_b2o;
+            // R_original(1,1) = cp;   R_original(1,2) = -sp;
+            // R_original(2,1) = sp;   R_original(2,2) = cp;
+            R_b2o.setValue(1, 0, 0, 
+                           0, cp, -sp, 
+                           0, sp, cp);
+
+            // T_b2o = eigenTransf2TF(R_original); // get transformation from base to origin 
+            T_b2o = tf::Transform(R_b2o);
+
+            // set floor center 
+            floor_z = floor_extracter.floor_z_; 
+            floor_y = floor_extracter.floor_y_;
+            floor_x = floor_extracter.floor_x_; 
+            floor_center.setValue(floor_x, floor_y, floor_z);
+
+            floor_center = T_g2b*T_b2o*floor_center;
+            floor_level = floor_center.z();
+            ROS_ERROR("graph_wrapper.cpp: floor_z: %f floor level: %f", floor_center.z(), floor_level);
+
+            // R_original(1,1) = cp;   R_original(1,2) = sp;
+            // R_original(1,2) = -sp;   R_original(2,2) = cp;
+         } 
+      }
+    }
+    */
+    // weather to send point data 
+    ParamSrvMi* ps = ParamSrvMi::instanceMi();
+
+    // from global to camera 
+    T_g2c = T_g2b * T_b2o * T_o2c; 
+
+    // mapping robot reference to 2D map reference z->x, x->-y, pitch-> theta
+    // 2D pixel coordinate reference 
+    //   
+    //  O ----- x
+    //    |
+    //    |
+    //    y
+    tf::Vector3 t = T_g2c.getOrigin(); 
+ 
+    // the rule map from 3D to 2D 
+    int mapping_rule_select = ps->get<int>("mapping_rule");
+    mapping_rule_select_ = mapping_rule_select; 
+      
+    float x1, y1, z1; 
+    float x2, y2, z2; 
+    x1 = t.getX(); y1 = t.getY(); z1 = t.getZ(); 
+    
+    // quaternion q w,x,y,z -> q0, q1, q2, q3
+    // tf::Quaternion q = tf_trans.getRotation();    
+    tf::Quaternion q = T_g2c.getRotation();    
+    
+    // http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    // float yaw = asin(2*(q.w()*q.y() - q.x()*q.z())); 
+    float yaw = atan2(2*(q.w()*q.z() + q.x()*q.y()), 1-2*(SQ(q.y()) + SQ(q.z())));
+    // cerr<<"graph_wrapper.cpp: compute yaw: "<<R2D(yaw)<<endl;
+
+    // 2D map reference 
+    //
+    //    O ------- x2
+    //      |
+    //      |
+    //      |
+    //      y2 
+    //
+
+    if(mapping_rule_select ==1 )
+    {
+      //     O ----- y
+      //      |
+      //      |
+      //      x
+      // x2 = x1;
+      // z2 = z1*cp - y1*sp; 
+      // z2 = sqrt(z1*z1 + y1*y1);
+
+      // x2 = y1 ;
+      // y2 = x1*cp - z1*sp; 
+
+      x2 = y1; 
+      y2 = x1; 
+    }else if(mapping_rule_select == 2)
+    {
+      //        y
+      //        |
+      //        |
+      //        |
+      //       O ----- x 
+      // x2 = z1*cp - y1*sp; 
+      // z2 = -x1;
+
+      // x2 = x1*cp - z1*sp; 
+      // y2 = -y1;
+      
+      x2 = x1;
+      y2 = -y1;
+    }else if(mapping_rule_select == 3)
+    {
+      //        x
+      //        |
+      //        |
+      //        |  
+      // y ----- O
+      //
+      // x2 = -x1; 
+      // z2 = -(z1*cp - y1*sp);
+      
+      // x2 = -y1; 
+      // y2 = -(x1*cp - z1*sp);
+
+      x2 = -y1; 
+      y2 = -x1;
+    }else if(mapping_rule_select == 4)
+    {
+      // x ----- O     
+      //        |
+      //        |
+      //        | 
+      //        y
+      x2 = -x1; 
+      y2 = y1;
+    }
+    /* change initial heading  */
+    // pos_msg.data[0] = z2; //t.getZ(); 
+    // pos_msg.data[1] = -x2; //-t.getX();
+    pos_msg.data[0] = x2; 
+    // pos_msg.data[1] = z2;  
+    pos_msg.data[1] = y2;
+    // pos_msg.data[2] = yaw
+    // July 16, 2015, this is a bug, retrieve the reference transformation 
+    pos_msg.data[2] = -1*(yaw+M_PI);  
+
+    // cerr<<"graph_wrapper.cpp: yaw: "<<R2D(yaw)<<" pos_msg.yaw: "<<R2D(pos_msg.data[2])<<endl;
+
+    // add vertex id in msg, send it to the 2D localization program 
+    pos_msg.data[3] = new_node->vertex_id_;
+
+    if(ps->get<bool>("send_pc2_vis") && pn->pc_col->points.size() > 0)
+    {
+      // 1, transform point cloud to global reference 
+      pointcloud_type::Ptr global_pc(new pointcloud_type); 
+      pointcloud_type::Ptr distant_pc(new pointcloud_type); 
+
+      // distance threshold 
+      float min_distance_threshold = ps->get<float>("min_distance_thre"); 
+
+      // delete points too close
+      for(int i=0; i<pn->pc_col->points.size(); i++)
+      {
+        point_type& pt = pn->pc_col->points[i]; 
+        if(SQ(pt.x) + SQ(pt.y) + SQ(pt.z) > min_distance_threshold)  // TODO: this distance threshold should be a parameter 
+          distant_pc->points.push_back(pt);
+      }
+    
+      // first transform to the first coordinate reference 
+      // tf::Transform pose = eigenTransf2TF(v->estimate());
+      Eigen::Matrix4f eigen_transform ;      
+      // pcl_ros::transformAsMatrix(pose, eigen_transform);
+      pcl_ros::transformAsMatrix(T_g2c, eigen_transform);
+
+      // then, transform to parallel with floor
+      // eigen_transform = R_original*eigen_transform;
+
+      // Eigen::Matrix4f tmp1 = R_original*eigen_transform;
+      // pcl::transformPointCloud(*(pn->pc_col), *global_pc, eigen_transform);
+      pcl::transformPointCloud(*distant_pc, *global_pc, eigen_transform);
+
+      // 2, add the points (x, z) to the msg patch, y is orthogonal to the ground 
+      int N = global_pc->points.size(); // pn->pc_col->points.size();
+      int CNT = 0; 
+      pos_msg.data.resize(nn + N*2); 
+      vector<bool> flag(N, false);
+
+      for(int i=0; i<N; i++)
+      {
+        point_type& pt = global_pc->points[i]; //pn->pc_col->points[i]; 
+        // if(pt.y < floor_level) floor_level = pt.y;
+        if(pt.z < floor_level) floor_level = pt.z;
+        // if(pt.z - z2 < 0.6) flag[i] = true; // all points within 0.6 will be deleted
+      }
+      
+      // ROS_ERROR("graph_wrapper.cpp: floor_level = %f", floor_level);
+        
+      for(int i=0; i<N; i++)
+      {
+        if(flag[i]) continue;
+        point_type& pt = global_pc->points[i]; //pn->pc_col->points[i]; 
+        // if(floor_level != -10 && pt.y < floor_level + floor_range) 
+        if(floor_level != -10 && pt.z < floor_level + floor_range) 
+          continue;
+        
+        if(mapping_rule_select == 1)
+        {
+          //     O ----- x
+          //      |
+          //      |
+          //      z
+          // pos_msg.data[nn + 2*CNT] = pt.x; 
+          // pos_msg.data[nn + 2*CNT+1] = pt.z;
+          //     O ----- y
+          //      |
+          //      |
+          //      x
+          pos_msg.data[nn + 2*CNT] = pt.y; 
+          pos_msg.data[nn + 2*CNT+1] = pt.x;
+
+        }else if(mapping_rule_select == 2)
+        {
+          //        x
+          //        |
+          //        |
+          //        |
+          //       O ----- z
+          // pos_msg.data[nn + 2*CNT] = pt.z; 
+          // pos_msg.data[nn + 2*CNT+1] = -pt.x;
+
+          //        y
+          //        |
+          //        |
+          //        |
+          //       O ----- x
+          pos_msg.data[nn + 2*CNT] = pt.x; 
+          pos_msg.data[nn + 2*CNT+1] = -pt.y;
+
+        }else if(mapping_rule_select == 3)
+        {
+          //        z
+          //        |
+          //        |
+          //        |  
+          // x ----- O
+          //
+          // pos_msg.data[nn + 2*CNT] = -pt.x; 
+          // pos_msg.data[nn + 2*CNT+1] = -pt.z;
+
+          //        x
+          //        |
+          //        |
+          //        |  
+          // y ----- O
+          //
+          pos_msg.data[nn + 2*CNT] = -pt.y; 
+          pos_msg.data[nn + 2*CNT+1] = -pt.x;
+
+        }else if(mapping_rule_select == 4)
+        {
+          // x ----- O     
+          //        |
+          //        |
+          //        | 
+          //        y
+          pos_msg.data[nn + 2*CNT] = -pt.x;  
+          pos_msg.data[nn + 2*CNT+1] = pt.y;
+        }
+        else
+        {
+          ROS_ERROR("graph_wrapper.cpp: what? there is no such rule right now!");
+        }
+        ++CNT;
+        // pos_msg.data[3 + 2*i+1] = sqrt(SQ(pt.y) + SQ(pt.z));
+        // pos_msg.data[3 + 2*i+1] = pt.z*cp - pt.y*sp;
+      }
+      // cerr<<"graph_wrapper.cpp: send camera data size: "<<CNT<<endl;
+      pos_msg.data.resize(nn + CNT*2);
+    }
+
+    // ROS_ERROR("GraphWrapper, succeed to add node, broadcast result!"); 
+    r_pos_pub_.publish(pos_msg);   
+
+}
+
+double CGraphWrapper::normAngle(double angle, double base) {
+    double pi2 = 2*M_PI;
+    double min2pi = base + pi2;
+    while(angle>=min2pi) angle -= pi2;
+    while(angle<base) angle += pi2;
+    return angle;
+}
+
+

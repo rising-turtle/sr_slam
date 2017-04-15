@@ -1,0 +1,11 @@
+<launch>
+    <arg name="map_to" default="bluefox_ros_node/image_raw"/>
+    <arg name="calib_file" default="$(find ptam)/PtamFixParams"/>
+    <node name="cameracalibrator" pkg="ptam" type="cameracalibrator" clear_params="true" output="screen">
+	    <remap from="image" to="$(arg map_to)" />
+            <remap from="pose" to="pose"/>
+	    <!-- rosparam file="$(find ptam)/PtamFixParams.yaml"/-->
+            <rosparam file="$(arg calib_file)"/>
+    </node>
+</launch>
+

@@ -1,0 +1,49 @@
+<launch>
+  
+  <node pkg="sr_slam" type="publish_g2o" name="publish_g2o" output="log">
+    <param name="config/g2o_file"                 value="/home/davidz/work/ros_hydro_ws/devel/lib/sr_slam/subject_eit/gh_plane_before_opt.g2o"/>
+    <param name="config/g2o_file"                 value="/home/davidz/work/ros_hydro_ws/devel/lib/sr_slam/subject_eit/m_plane_after_opt.g2o"/>
+    <param name="config/g2o_file"                 value="/home/davidz/work/ros_hydro_ws/devel/lib/sr_slam/subject_eit/incremental_plane3d_opt.g2o"/>
+
+    <param name="config/g2o_file"                 value="/home/davidz/work/ros_hydro_ws/devel/lib/sr_slam/subject_eit/replace_result.g2o"/>
+    <!-- param name="config/g2o_file"                 value="/home/davidz/work/ros_hydro_ws/devel/lib/sr_slam/subject_eit/single_incremental_plane3d_opt.g2o"/-->
+
+    <param name="config/g2o_file"                 value="/home/davidz/work/ros_hydro_ws/devel/lib/sr_slam/subject_eit/plane3d_opt.g2o"/>
+    <param name="config/g2o_file"                 value="/home/davidz/work/ros_hydro_ws/devel/lib/sr_slam/subject_eit/replace_result.g2o"/>
+    <param name="config/g2o_file"                 value="/home/davidz/work/ros_hydro_ws/devel/lib/sr_slam/g2o_increments/g_770_after.g2o"/>
+
+
+    <param name="config/mapping_rule"           value="4"/>
+  </node>
+
+  <node pkg="vis_navigation" type="vis_navigation" name="slam_ui" output="log">
+  <param name="start_u"                       value="2680" />  <!-- 760 -->
+  <param name="start_v"                       value="550" /> <!-- 1150 -->
+  <param name="u_resolution"                  value="0.01960243"/>
+  <param name="v_resolution"                  value="0.01960243"/>
+  <param name="demo_place"                    value="eit_f5"/> <!-- default: etas_f5 -->
+
+  <!-- large transformation thresholds -->
+  <param name="large_x_threshold"             value="60"/>
+  <param name="large_y_threshold"             value="140"/>
+  <!-- param name="large_theta_threshold"         value="2"/ -->
+
+  <param name="record_pos_2D"                 value="false"/> <!-- whether to record pos msg from rgbdslam -->
+
+  <!-- mapping_rule = 1, -M_PI/2, mapping_rule = 2, 0, mapping_rule = 3, M_PI/2 -->
+  <!-- param name="init_heading"              value="0" --> <!-- default: -M_PI/2 -->
+  <param name="init_heading"                  value="-1.570796327"/> <!--  3.141592654 default: -M_PI/2 -->
+
+  <param name="bg_img_name"                   value="/home/davidz/work/ros_hydro_ws/devel/lib/vis_navigation/EIT_Building_Floor5_2.png"/>
+  <!-- line extractor parameters -->
+  <param name="number_of_points"              value="50"/>  <!-- the minimal number of points in a line -->
+  <param name="min_hist_delete"               value="15"/>   <!-- 5 threshold for deleting points-->
+  <param name="min_hist_thre"                 value="45"/>  <!-- 15 threshold for hist filter --> 
+  <param name="min_line_length"               value="4000"/> <!-- 10000 = 100^2, 100*0.02 = 2m sq of the minimal line length -->
+
+  <!-- save hist and line points -->
+  <param name="save_hist_points"              value="false"/>
+</node>
+
+
+</launch>

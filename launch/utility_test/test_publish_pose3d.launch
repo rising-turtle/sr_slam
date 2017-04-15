@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="eit_2d_display.launch">
+  <arg name="robot_pos" value="/pos_2d"/>
+  </include>
+
+  <node pkg="sr_slam" type="publish_3d_2d" name="publish_3d_2d" output="screen">
+    <remap from="/pos_3d"  to="/log_pose_3d"/>
+    <param name="mapping_rule_2d" value="4"/>
+    <param name="display_received_pose" value="true"/>
+  </node>
+ 
+  <node pkg="sr_slam" type="test_publish_pose3d"  name="test_publish_pose3d" output="screen">
+    <param name="pose_dir" value="/media/work/3rdlibs/lsd_slam_noros-master/lsd_slam_noros-master/build-x86-v12/apps/slam/pose_estimation.log"/>
+    <param name="publish_rate" value="10"/>
+  </node>
+  
+
+</launch>

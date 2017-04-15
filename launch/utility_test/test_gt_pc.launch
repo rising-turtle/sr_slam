@@ -1,0 +1,17 @@
+<launch>
+
+  <node pkg="sr_slam" type="test_gt_pc" name="test_gt" output="screen">
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_3" />
+    <param name="sr_data_prefix"                value="d1"/>
+    <param name="sr_data_suffix"                value="bdat"/> <!-- dat -->
+    <param name="sr_start_frame"                value="100"/> <!-- 12 1 -->
+    <param name="sr_end_frame"                  value="200"/> <!-- 1100 2230 --> 
+    <param name="sr_new_file_version"           value="false"/> <!-- true -->
+    <param name="config/store_pointclouds"      value="true"/> 
+    <param name="gt_file"  value="/home/davidz/.ros/lsd_slam/gt/data_3_rgbd_gt_pose.log"/> <!-- where to find ground truth file -->
+    <param name="gt_file" value="/home/davidz/work/data/SwissRanger4000/bdat/result/dataset_3/comp_lsd_vo/trajectory_estimate.txt"/>
+    <param name="gt_file_cp"  value="/home/davidz/.ros/lsd_slam/gt/data_3_rgbd_gt_pose.log"/> <!-- where to find ground truth file -->
+
+  </node>
+
+</launch>

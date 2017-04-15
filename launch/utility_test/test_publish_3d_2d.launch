@@ -1,0 +1,32 @@
+<launch>
+  
+  <!-- include file="../offline_sr4k_slam.launch"-->
+  <!-- include file="../sr4k_vro/rgbd_vro.launch"-->
+  <include file="../sr4k_vro/rgbd_vro_em.launch">
+  <arg name="publish_pose_3d"   value="true"/>
+  </include>
+
+  <node pkg="sr_slam" type="publish_3d_2d" name="publish_3d_2d" output="screen">
+    <remap from="/pos_3d"  to="/offline/pose"/>
+    <param name="mapping_rule_2d" value="4"/> <!-- EIT:4, ETAS: 2 -->
+    <param name="display_received_pose" value="true"/> 
+  </node>
+ 
+  <node pkg="vis_navigation" type="vis_navigation" name="slam_ui" output="screen">
+  <remap from="/robot_pos"     to="/pos_2d"/>
+  <param name="display_rgbd_traj"             value="false"/>
+  <param name="start_u"                       value="2680" />  <!-- 2080  -->
+  <param name="start_v"                       value="550" /> <!-- 275 -->
+  <param name="u_resolution"                  value="0.01960243"/> <!-- 0.02040382 -->
+  <param name="v_resolution"                  value="0.01960243"/> <!-- 0.0199 -->
+  <param name="demo_place"                    value="eit_f5"/> <!-- default: etas_f5 -->
+
+  <!-- mapping_rule = 1, -M_PI/2, mapping_rule = 2, 0, mapping_rule = 3, M_PI/2 -->
+  <param name="init_heading"                  value="-1.570796327"/> <!-- 1.570796327 3.141592654 default: -M_PI/2 -->
+  <param name="bg_img_name"                   value="/home/davidz/work/ros_hydro_ws/devel/lib/vis_navigation/Floor5_ETASS.png"/>
+  <param name="bg_img_name"                   value="/home/davidz/work/ros_hydro_ws/devel/lib/vis_navigation/EIT_Building_Floor5_2.png"/>
+
+</node>
+
+
+</launch>

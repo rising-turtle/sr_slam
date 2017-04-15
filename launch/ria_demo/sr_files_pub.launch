@@ -1,0 +1,20 @@
+<launch>
+<node pkg="sr_slam" type="sr_publisher" name="sr_publisher" output="log">
+  <param name="sr_source"                     value="SR_FILE"/> <!--value="SR_FILE", "SR_CAM" "SR_TCP"/-->
+  <param name="sr_publish_rate"               value="20"/> <!-- 10 publish rate hz-->
+  <param name="sr_publish_max"                value="-1"/> <!-- publish max -->
+
+  <!-- SR_FILE parameters -->
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_21"/>
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_121"/> <!-- 80+ -->
+  <!-- param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_1"/-->
+
+  <param name="sr_start_frame"                value="1"/>
+  <param name="sr_end_frame"                  value="2230"/> <!-- 3130 -->
+  <param name="sr_new_file_version"           value="false"/> <!-- true -->
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/>
+
+</node>
+
+</launch>

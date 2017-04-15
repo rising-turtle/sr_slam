@@ -1,0 +1,18 @@
+<launch>
+ <node pkg="sr_slam" type="sr_read_test" name="SR_test" output="screen">
+  <param name="sr_source"                     value="SR_FILE"/> <!--value="SR_FILE", "SR_CAM" "SR_TCP"/-->
+
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_3" />
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_121" />
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_70" />
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_3"/>
+
+
+  <param name="sr_start_frame"                value="1"/>
+  <param name="sr_end_frame"                  value="50"/>
+  
+  <param name="sr_new_file_version"           value="false"/>
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/>
+ </node>
+</launch>

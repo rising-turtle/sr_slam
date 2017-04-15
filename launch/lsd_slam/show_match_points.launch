@@ -1,0 +1,17 @@
+<launch>
+  
+  <arg name="data_dir" default="/home/davidz/work/data/SwissRanger4000/exp/dataset_82"/>
+  <node pkg ="sr_slam" type="main_show_match_points" name="main_show_match_points" output="screen">
+    <param name="~calib" value="$(find sr_slam)/calib/SR4K_usb_calib.cfg"/>
+    <param name="previous_frame_path"     value="$(arg data_dir)/d1_0830.bdat"/>  <!-- d1_0882.bdat -->
+    <param name="current_frame_path"      value="$(arg data_dir)/d1_0832.bdat"/>  <!-- d1_0884.bdat -->
+    <param name="initial_match_log"       value="/home/davidz/.ros/lsd_slam/compare/10_12_22.log"/>  <!-- 62_64_199.log --> 
+    <param name="final_match_log"         value="/home/davidz/.ros/lsd_slam/compare/10_12_28.log"/>  <!-- 62_64_205.log-->
+    <param name="transform_log"           value="/home/davidz/.ros/lsd_slam/compare/trans_10_12.log"/>  <!-- trans_62_64.log -->
+    <param name="show_point_cloud"        value="true"/>
+    <param name="config/store_pointclouds"  value="true"/>
+    <param name="sr_new_file_version"           value="false"/> <!-- true -->
+    <param name="show_points_step"        value="200"/>
+  </node>
+
+</launch>

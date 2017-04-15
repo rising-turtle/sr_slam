@@ -1,0 +1,24 @@
+<launch>
+
+  <node pkg="sr_slam" type="publish_3d_2d" name="publish_3d_2d" output="screen">
+    <remap from="/pos_3d"  to="/lsd_slam/pose"/>
+    <param name="mapping_rule_2d" value="4"/> <!-- EIT:4, ETAS: 2 -->
+  </node>
+
+<node pkg="lsd_slam_viewer" type="viewer" name="viewer" output="log" args="">
+</node>
+
+  <node pkg="sr_slam" type="main_imgs_dpt_lsd"  name="main_imgs_dpt_lsd" output="screen">
+    <param name="~calib" value="$(find sr_slam)/calib/SR4K_usb_calib.cfg"/>
+    <!-- using only keyframe alignment  -->
+    <param name="sr_specific_id"                value="false"/>
+    <param name="sr_specific_log"               value="/home/davidz/.ros/lsd_slam/rgbd_vro_id.log"/>
+    <param name="sr_start_frame"    value="1"/> <!-- 1 1 820 -->
+    <param name="sr_end_frame"      value="2120"/> <!--2120 2270 1200 -->
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_3"/>
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_82" /> <!-- 70 -->
+  </node>
+
+
+
+</launch>

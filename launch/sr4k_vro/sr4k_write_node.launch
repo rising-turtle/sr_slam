@@ -1,0 +1,59 @@
+<launch>
+
+<node pkg="sr_slam" type="sr_main_plane" name="sr_slam_plane" output="screen">
+
+  <!-- sr4k data parameters -->
+  <!-- param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/with_gt/dataset_41" / -->
+  <!-- param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/dat/dataset_10"/-->
+  <!-- param name="sr_data_file_dir"        value="/home/davidz/work/data/SwissRanger4000/bdat/angle_test/dataset_36"/-->
+  <!-- param name="sr_data_file_dir"        value="/home/davidz/work/data/SwissRanger4000/bdat/angle_test/pitch_v2/dataset_35"/-->
+  <!-- param name="sr_data_file_dir"        value="/home/davidz/work/data/SwissRanger4000/bdat/angle_test/tx_v2/dataset_35"/-->
+  <param name="sr_data_file_dir"        value="/home/davidz/work/data/SwissRanger4000/bdat/angle_test/yaw_v2/dataset_45"/>
+
+  <param name="config/save_node_path"         value="/home/davidz/work/data/SwissRanger4000/vro_results/bdat/angle_test/yaw_v2/dataset_45" />
+  <!-- write nodes into disk -->
+  <!-- param name="config/save_node_path"     value="/home/davidz/work/data/SwissRanger4000/vro_results/gt/dataset_41" / -->
+  <!-- param name="config/save_node_path"     value="/home/davidz/work/data/SwissRanger4000/vro_results/dat/dataset_10" /-->
+  <!-- param name="config/save_node_path"         value="/home/davidz/work/data/SwissRanger4000/vro_results/bdat/angle_test/dataset_36" /-->
+  <!-- param name="config/save_node_path"         value="/home/davidz/work/data/SwissRanger4000/vro_results/bdat/angle_test/pitch_v2/dataset_35" /-->
+  <!-- param name="config/save_node_path"         value="/home/davidz/work/data/SwissRanger4000/vro_results/bdat/angle_test/tx_v2/dataset_35" /-->
+
+
+
+  <param name="sr_data_prefix"                value="d1"/>
+  <!-- param name="sr_data_suffix"                value="bdat"/ -->
+  <param name="sr_data_suffix"                value="bdat"/> <!-- dat/bdat -->
+  <param name="sr_start_frame"                value="1"/>
+  <param name="sr_end_frame"                  value="501"/> 
+  <!-- param name="sr_new_file_version"           value="true"/ -->
+  <param name="sr_new_file_version"           value="false"/>  <!-- dat: old_version bdat: old_version/new_version -->
+
+  <param name="config/fixed_frame_name"       value="/map"/>
+  <param name="config/base_frame_name"        value=""/>
+  <param name="config/bagfile_name"           value=""/>
+
+
+  <param name="config/save_node_image"                value="false"/>
+
+  <param name="config/process_node_method"            value="write" /> <!-- slam, write, display  -->
+  <param name="config/read_node_from_disk"            value="false" /> <!--  -->
+
+  <!-- Visual Features, to activate GPU-based features see CMakeLists.txt -->
+  <param name="config/feature_detector_type"         value="SIFTGPU"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/feature_extractor_type"        value="SIFTGPU"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+
+  <!-- sift parameters only works when detector_type = SIFT -->
+  <param name="sift_num_features"                   value="0" /> <!-- number of returned sift features -->
+  <param name="sift_octave_layers"                  value="5" /> <!-- number octave layers -->
+  <param name="sift_contrast_threshold"             value="0.04" /> <!-- initial threshold for keypint detection -->
+  <param name="siftgpu_contrast_threshold"          value="0.0018" /> <!-- initial DOG threshold for siftgpu -->
+  <param name="siftgpu_edge_threshold"              value="10." /> <!-- edge threshold for siftgpu  -->
+
+  <!-- display the 3D map, and reproject 2D point -->
+  <param name="config/store_pointclouds"      value="true"/> 
+  <param name="config/visualize_keyframes_only" value="true"/>
+  <param name="config/glwidget_without_clouds" value="false"/>
+  <param name="config/send_pc2_vis"           value="true"/>
+
+</node>
+</launch>

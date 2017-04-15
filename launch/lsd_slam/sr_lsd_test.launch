@@ -1,0 +1,13 @@
+<launch>
+
+<node pkg="lsd_slam_viewer" type="viewer" name="viewer" output="log" args="">
+</node>
+
+  <node pkg="sr_slam" type="main_sr_lsd"  name="SR_LSD_SLAM" output="log">
+    <param name="~calib" value="$(find sr_slam)/calib/SR4K_usb_calib.cfg"/>
+    <param name="sr_end_frame"      value="600"/>
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_3"/>
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_70" /> <!-- 70 -->
+  </node>
+
+</launch>

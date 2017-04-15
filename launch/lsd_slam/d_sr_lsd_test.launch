@@ -1,0 +1,23 @@
+<launch>
+
+<node pkg="lsd_slam_viewer" type="viewer" name="viewer" output="log" args="">
+</node>
+
+  <node pkg="sr_slam" type="main_imgs_dpt_lsd"  name="main_imgs_dpt_lsd" output="screen">
+    <param name="~calib" value="$(find sr_slam)/calib/SR4K_usb_calib.cfg"/>
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_3"/>
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_82" /> <!-- 82 -->
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_91" /> <!-- 82 -->
+
+    <!-- syn_start_frame: dataset_3: 12 - 1100, dataset_2: 2 - 2310, dataset_1: 3-1200 -->
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_3"/>
+    <param name="sr_start_frame"    value="12"/>  <!-- 70 -->
+    <param name="sr_end_frame"      value="1100"/> <!-- 810 -->
+
+    <param name="sr_data_file_dir"  value="/home/davidz/work/data/SwissRanger4000/exp/dataset_82" /> <!-- 82 -->
+    <param name="sr_start_frame"    value="820"/>  <!-- 70 -->
+    <param name="sr_end_frame"      value="1000"/> <!-- 810 -->
+
+  </node>
+
+</launch>

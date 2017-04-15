@@ -1,0 +1,38 @@
+<launch>
+
+<node pkg="sr_slam" type="sr_publisher" name="sr_publisher" output="screen">
+<!--node pkg="sr_slam" type="sr_pcl_show" name="pcl_show" output="screen"-->
+  <param name="sr_source"                     value="SR_FILE"/> <!--value="SR_FILE", "SR_CAM" "SR_TCP"/-->
+
+  <param name="sr_data_file_dir"              value="/home/davidz/work/EmbMess/mesa/pcl_mesa/build/bin/sr_data"/>
+  <param name="sr_start_frame"                value="1"/>
+  <param name="sr_end_frame"                  value="50"/>
+  
+  <param name="sr_new_file_version"           value="true"/>
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/>
+
+  <param name="sr_cam_ip"                     value="192.168.0.11"/>
+  <param name="sr_cam_it"                     value="30"/>
+</node>
+
+<node pkg="sr_slam" type="sr_main" name="sr_slam" output="screen">
+  <param name="config/fixed_frame_name"       value="/map"/>
+  <param name="config/base_frame_name"        value=""/>
+
+  <!-- Visual Features, to activate GPU-based features see CMakeLists.txt -->
+  <param name="config/feature_detector_type"         value="SIFT"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/feature_extractor_type"        value="SIFT"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/min_keypoints"                 value="50"/><!-- Extract no less than this many ... -->
+
+  <!-- Algortithm settings -->
+  <param name="config/min_translation_meter"         value="0.1"/><!-- frames with motion less than this, will be omitted -->
+  <param name="config/min_rotation_degree"           value="5"/><!-- frames with motion less than this, will be omitted -->
+  <param name="config/predecessor_candidates"        value="5"/><!-- search through this many immediate predecessor nodes for corrspondences -->
+  <param name="config/neighbor_candidates"           value="5"/><!-- search through this many graph neighbour nodes for corrspondences -->
+  <param name="config/min_sampled_candidates"        value="5"/><!-- search through this many uniformly sampled nodes for corrspondences -->
+  <param name="config/max_connections"               value="10"/><!-- stop after this many succesfully found spation relations -->
+
+</node>
+
+</launch>

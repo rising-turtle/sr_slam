@@ -1,0 +1,17 @@
+<launch>
+
+<!-- include file="sr_files_pub.launch"/-->
+<!-- include file="sr_slam_offline.launch"/-->
+
+<include file="sr_tcp_pub.launch"/>
+<include file="sr_slam.launch" />
+
+<node pkg="vis_navigation" type="voice_agent" name="voice_agent" output="screen">
+  <param name="voice_server_ip"               value="192.168.1.2"/>
+  <param name="voice_server_ip"               value="10.0.0.14"/>
+  <param name="voice_server_ip"               value="172.20.10.10"/>
+  <param name="voice_server_ip"               value="192.168.100.2"/>
+  <param name="dst_exist"                     value="false"/>
+</node>
+
+</launch>

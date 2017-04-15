@@ -1,0 +1,35 @@
+<launch>
+
+<node pkg="vis_navigation" type="vis_navigation" name="slam_ui" output="screen">
+  <param name="start_u"                       value="2680" /> <!-- 2380 -->
+  <param name="start_v"                       value="550" />
+  <param name="u_resolution"                  value="0.01960243"/>
+  <param name="v_resolution"                  value="0.01960243"/>
+  <param name="demo_place"                    value="eit_f5"/> <!-- default: etas_f5 -->
+
+  <!-- large transformation thresholds -->
+  <param name="large_x_threshold"             value="60"/>
+  <param name="large_y_threshold"             value="140"/>
+  <!-- param name="large_theta_threshold"         value="0.28"/ --> <!-- angle alteration less than this value -->
+
+  <!-- mapping_rule = 1, 0, mapping_rule = 2, M_PI/2, mapping_rule = 3, M_PI -->
+  <param name="init_heading"                  value="-1.570796327"/> <!-- 1.570796327 default: -M_PI/2 -->
+  <param name="bg_img_name"                   value="/home/davidz/work/ros_hydro_ws/devel/lib/vis_navigation/EIT_Building_Floor5_2.png"/>
+
+  <!-- line extractor parameters -->
+  <param name="number_of_points"              value="50"/>  <!-- the minimal number of points in a line -->
+  <param name="min_hist_delete"               value="15"/>   <!-- 5 threshold for deleting points-->
+  <param name="min_hist_thre"                 value="45"/>  <!-- 15 threshold for hist filter --> 
+  <param name="min_line_length"               value="4000"/> <!-- 10000 = 100^2, 100*0.02 = 2m sq of the minimal line length -->
+
+  <!-- save hist and line points -->
+  <param name="save_hist_points"              value="false"/>
+</node>
+
+<node pkg="vis_navigation" type="voice_agent" name="voice_agent" output="screen">
+  <param name="voice_server_ip"               value="192.168.1.5"/>
+  <!-- param name="voice_server_ip"               value="192.168.0.100"/ -->
+</node>
+
+
+</launch>

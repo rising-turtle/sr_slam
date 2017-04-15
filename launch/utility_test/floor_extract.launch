@@ -1,0 +1,30 @@
+<launch>
+
+<node pkg="sr_slam" type="test_floor" name="test_floor" output="screen">
+
+  <!-- sr4k data parameters -->
+  <!-- param name="sr_data_file_dir"          value="/home/davidz/work/data/SwissRanger4000/with_gt/dataset_41" / -->
+  <!-- param name="sr_data_file_dir"          value="/home/davidz/work/data/SwissRanger4000/dat/dataset_11"/-->
+  <!-- param name="sr_data_file_dir"          value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_1"/-->
+  <!-- param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/angle_test/dataset_36"/-->
+
+  <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/angle_test/pitch_v1/dataset_42"/>
+  <!--param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/angle_test/tx_v1/dataset_35"/-->  
+
+  <param name="config/read_node_from_disk"    value="true" /> <!--  -->
+  <!-- param name="config/save_node_path"         value="/home/davidz/work/data/SwissRanger4000/vro_results/bdat/angle_test/dataset_30" /-->
+  <param name="config/save_node_path"         value="/home/davidz/work/data/SwissRanger4000/vro_results/bdat/angle_test/pitch_v1/dataset_39" />
+
+  <!-- param name="config/save_node_path"         value="/home/davidz/work/data/SwissRanger4000/vro_results/bdat/angle_test/tx_v2/dataset_50" /-->
+
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/> <!-- dat/bdat -->
+  <param name="sr_start_frame"                value="1"/>
+  <param name="sr_end_frame"                  value="5"/>  <!-- 101  -->
+  <param name="sr_new_file_version"           value="false"/>  <!-- dat: old_version bdat: old_version/new_version -->
+  <param name="sr_display_floor"              value="false"/> <!-- weather to display the extracted floor -->
+  <param name="plane_number_threshold"        value="0.1"/> <!-- minimal percent of points that deemed as a plane -->
+  <param name="b_display_camera_ray"          value="true"/> <!-- weather to display camera rays -->
+
+</node>
+</launch>

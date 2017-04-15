@@ -1,0 +1,11 @@
+<launch>
+
+<node pkg="lsd_slam_viewer" type="viewer" name="viewer" output="log" args="">
+</node>
+
+<node pkg="sr_slam" type="main_live_dpt_lsd" name="main_live_dpt_lsd" output="screen">
+  <remap from="image"             to="/image_raw"/>
+  <remap from="camera_info"       to="/camera_info"/>
+</node>
+
+</launch>

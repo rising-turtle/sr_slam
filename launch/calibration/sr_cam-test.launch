@@ -1,0 +1,13 @@
+<launch>
+  <include file="../sr4k_io/sr_publish_img_dpt.launch">
+    <arg name="sr_source" value="SR_FILE"/>
+    <arg name="sr_end_frame"  value="2500"/>
+    <arg name="sr_publish_rate" value="10"/>
+    <arg name="sr_syn_from_receiver" value="false"/>
+  </include>
+
+  <include file="image_view.launch">
+    <arg name="map_to"  value="/sr_img_raw"/>
+  </include>
+
+</launch>

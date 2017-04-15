@@ -1,0 +1,35 @@
+<launch>
+
+  <node pkg="vis_navigation" type="vis_navigation" name="slam_ui" output="log">
+  <remap from="/robot_pos"     to="/pos_2d"/>
+  <param name="display_rgbd_traj"             value="false"/>
+  <param name="start_u"                       value="2680" />  <!-- 760 -->
+  <param name="start_v"                       value="550" /> <!-- 1150 -->
+  <param name="u_resolution"                  value="0.01960243"/>
+  <param name="v_resolution"                  value="0.01960243"/>
+  <param name="demo_place"                    value="eit_f5"/> <!-- default: etas_f5 -->
+
+  <!-- mapping_rule = 1, -M_PI/2, mapping_rule = 2, 0, mapping_rule = 3, M_PI/2 -->
+  <param name="init_heading"                  value="-1.570796327"/> <!--  3.141592654 default: -M_PI/2 -->
+  <param name="bg_img_name"                   value="/home/davidz/work/ros_hydro_ws/devel/lib/vis_navigation/EIT_Building_Floor5_2.png"/>
+
+</node>
+
+
+<node pkg="lsd_slam_viewer" type="viewer" name="viewer" output="screen" args="">
+</node>
+
+  <node pkg="sr_slam" type="main_sr_lsd"  name="SR_LSD_SLAM" output="screen">
+    <param name="~calib" value="$(find sr_slam)/calib/SR4K_usb_calib.cfg"/>
+    <param name="sr_end_frame"      value="600"/>
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/bdat/dataset_3"/>
+    <param name="sr_data_file_dir"              value="/home/davidz/work/data/SwissRanger4000/exp/dataset_82" /> <!-- 70 -->
+  </node>
+
+  <node pkg="sr_slam" type="publish_3d_2d" name="publish_3d_2d" output="screen">
+    <remap from="/pos_3d"  to="/lsd_slam/pose"/>
+    <param name="mapping_rule_2d" value="4"/>
+  </node>
+ 
+
+</launch>

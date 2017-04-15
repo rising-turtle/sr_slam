@@ -1,0 +1,100 @@
+<launch>
+
+<node pkg="sr_slam" type="sr_publisher" name="sr_publisher" output="log">
+  <param name="sr_source"                     value="SR_TCP"/> <!--value="SR_FILE", "SR_CAM" "SR_TCP"/-->
+  <param name="sr_publish_rate"               value="20"/> <!-- publish rate hz-->
+  <param name="sr_publish_max"                value="-1"/> <!-- publish max frames -->
+
+  <param name="sr_data_prefix"                value="d1"/>
+  <param name="sr_data_suffix"                value="bdat"/>
+  <param name="sr_new_file_version"           value="true"/> <!-- true -->
+
+  <!-- SR_TCP parameters -->
+
+  <param name="sr_server_ip"                         value="192.168.1.7"/>
+  <param name="sr_server_ip"                         value="192.168.1.7"/>
+  <param name="sr_server_ip"                     value="192.168.100.3"/>
+  <!-- param name="sr_server_ip"                     value="192.168.0.100"/ -->
+
+  <param name="sr_server_port_id"                value="27015"/> 
+  
+  <!-- weather and where to record sr_files -->
+  <param name="sr_record_exp_data"            value="0"/>
+  <param name="sr_record_dir"                 value="/home/davidz/work/data/SwissRanger4000/exp"/> 
+
+</node>
+
+<node pkg="vis_navigation" type="voice_agent" name="voice_agent" output="screen">
+  <param name="voice_server_ip"               value="192.168.1.7"/>
+  <param name="voice_server_ip"               value="192.168.100.3"/>
+  <param name="dst_exist"                     value="false"/>
+  <!-- param name="voice_server_ip"               value="192.168.0.100"/ -->
+</node>
+
+<node pkg="sr_slam" type="sr_main" name="sr_slam" output="log">
+  <param name="config/b_add_floor_into_graph"   value="true"/> <!-- true -->
+  <param name="config/fixed_frame_name"       value="/map"/>
+  <param name="config/base_frame_name"        value=""/>
+  <param name="config/bagfile_name"           value=""/>
+ 
+  <!-- select one mapping rule from 3D to 2D map  -->
+  <param name="config/mapping_rule"           value="4"/> <!-- 2 -->
+
+  <!-- use mininal distance to delete points too near -->
+  <param name="config/min_distance_thre"      value="0.5"/>
+
+  <!-- keep good nodes, try to maintain the process if vro fails -->
+  <param name="config/keep_good_nodes"        value="true"/>
+
+  <!-- display the 3D map, and reproject 2D point -->
+  <param name="config/store_pointclouds"      value="true"/> 
+  <param name="config/visualize_keyframes_only" value="true"/>
+  <param name="config/glwidget_without_clouds" value="false"/>
+  <param name="config/send_2_vis"             value="true"/>
+  <param name="config/send_pc2_vis"           value="true"/>
+  
+  <!-- display style -->
+  <param name="config/cloud_display_type"             value="POINTS"  />
+
+  <!-- imu initial data -->
+  <param name="config/imu_roll"               value="0"/> <!-- -1 means to retrieve imu data from the device -->
+  <param name="config/imu_pitch"              value="0"/>
+
+  <!-- sift and siftgpu parameters -->
+  <param name="sift_num_features"                   value="0" /> <!-- number of returned sift features -->
+  <param name="sift_octave_layers"                  value="5" /> <!-- number octave layers -->
+  <param name="sift_contrast_threshold"             value="0.04" /> <!-- initial threshold for keypint detection -->
+  <param name="siftgpu_contrast_threshold"          value="0.0010" /> <!--0.0008 0.0018 initial DOG threshold for siftgpu -->
+  <param name="siftgpu_edge_threshold"              value="10." /> <!-- edge threshold for siftgpu  -->
+
+  <!-- Visual Features, to activate GPU-based features see CMakeLists.txt -->
+  <param name="config/feature_detector_type"         value="SIFTGPU"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/feature_extractor_type"        value="SIFTGPU"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/min_keypoints"                 value="50"/><!-- Extract no less than this many ... -->
+  <param name="config/min_matches"                   value="10"/> <!-- 5 Minimal number of matched features before RANSAC 29? -->
+  <param name="config/nn_distance_ratio"                    value="0.95"/> <!-- 0.95 Feature correspondence is valid if distance to nearest neighbour is smaller than this parameter times the distance to the 2nd neighbour. This needs to be 0.9-1.0 for SIFTGPU w/ FLANN, since SIFTGPU Features are normalized-->
+
+   <!-- decide detect obstacles in the front  -->
+  <param name="config/b_front_obstacle_detect"     value="true"/> <!-- check some obstacle appear in the front -->
+  <param name="config/obstacle_min_z"              value="-0.5"/>
+  <param name="config/obstacle_len_y"              value="0.6" />
+  <param name="config/obstacle_max_x"              value="5" />
+  <param name="config/obstacle_density_threshold"  value="0.04" />
+  <param name="config/obstacle_number_pt_threshold"  value="2000" />
+
+  <param name="config/max_dist_for_inliers"         value="0.05" /> <!-- 6 3 "Mahalanobis distance for matches to be considered inliers by ransac"-->
+  <param name="config/vro_strategy"                 value="vro_my" /> <!-- " VRO strategy: VRO_ori, VRO_my, VRO_plane, VRO_plane_em" -->
+  <param name="ransac_iterations"                   value="5000" /> <!-- "Number of iterations for registration" -->
+
+  <!-- Algortithm settings -->
+  <param name="config/backend_solver"                value="csparse"/> <!-- cholmod csparse graph backend optimization -->
+  <param name="config/min_translation_meter"         value="0.1"/><!-- 0.05 frames with motion less than this, will be omitted -->
+  <param name="config/min_rotation_degree"           value="2"/><!-- 2 frames with motion less than this, will be omitted -->
+  <param name="config/predecessor_candidates"        value="5"/><!-- search through this many immediate predecessor nodes for corrspondences -->
+  <param name="config/neighbor_candidates"           value="0"/><!-- search through this many graph neighbour nodes for corrspondences -->
+  <param name="config/min_sampled_candidates"        value="0"/><!-- search through this many uniformly sampled nodes for corrspondences -->
+  <param name="config/max_connections"               value="5"/><!-- stop after this many succesfully found spation relations -->
+</node>
+
+
+</launch>

@@ -1,0 +1,7 @@
+<launch>
+
+<node pkg="sr_slam" type="test_gyro_display" name="test_gyro_display" output="screen">
+  
+</node>
+
+</launch>

@@ -1,0 +1,10 @@
+<launch>
+  
+  <include file="cube_display.launch"/>
+  
+  <node pkg="imu_recorder" type="imu_vn100_recorder" name="imu_recorder" output="screen">
+    <param name="imu_record_file" value=""/> <!-- where to record imu_data-->
+    <param name="publish_rpy"     value="true"/> <!-- whether to publish rpy -->
+  </node>
+
+</launch>

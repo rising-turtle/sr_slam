@@ -1,0 +1,22 @@
+
+for slam online
+1 sr_slam_old_file.launch for test : load file of the old version + sr_publisher + sr_slam + 2D_navigation 
+2 subject_tcp_*.launch for demo : tcp new version -> sr_publisher + sr_slam + 2D_navigation + voice_agent 
+3 subject_test_*.launch for demo : load file new version -> sr_publisher + sr_slam + 2D_navigation
+4 sr_slam_[new|old]_file: load file [new|old] version -> sr_publisher + sr_slam + 2D_navigation
+5 offline_sr4k_slam: load file -> graph (depends onthe process_node_method : display/write/slam)
+
+for test
+1 test_dst_room.launch for test path planning module given multiple destination rooms
+2 vro_test.launch for test VO: load node from file, and show the result of VO
+3 sr_publish_test.launch for test: load file -> sr_publisher + sr_subscriber
+4 sr_publish_slam.launch for test: load file -> sr_publisher + sr_slam 
+5 record_new_tcp.launch : tcp new version -> sr_pulisher (record sr data) + sr_slam
+6 save_vro_results.launch : file new version -> sr_publisher + sr_slam (record node data)
+7 sr4k_write_node.launch: file -> graph (construct node and record node data)
+8 subject_msg_eit.launch: file (2D pos msg) -> 2D_navigation 
+
+for display 
+1 sr_publish_pcl_show.launch for display: load file -> pcl_visualization 
+2 sr4k_display_node.launch : load file -> graph ( display image, depth and features)
+1 batch_slam.launch: load file  

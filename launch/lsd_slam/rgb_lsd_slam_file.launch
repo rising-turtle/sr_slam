@@ -1,0 +1,15 @@
+
+<launch>
+
+<node pkg="lsd_slam_viewer" type="viewer" name="viewer" output="screen" args="">
+</node>
+
+<!-- arg name="data_dir" default="/media/work/work/data/rgbd/rgbd_dataset_freiburg2_desk"/-->
+<arg name="data_dir" default="/media/work/work/data/rgbd/rgbd_dataset_freiburg1_desk2"/>
+
+<node pkg="lsd_slam_core" type="dataset" name="LSD_SLAM" output="screen">
+  <param name="~calib"    value="$(arg data_dir)/cameraCalibration.cfg"/>
+  <param name="~files"    value="$(arg data_dir)/rgb"/>
+</node>
+
+</launch>

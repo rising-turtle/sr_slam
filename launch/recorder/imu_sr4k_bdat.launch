@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="data_dir" default="/home/davidz/work/data/SwissRanger4000/imu_bdat/etas_f5">
+  <include file="cube_display.launch"/>
+  
+  <node pkg="imu_recorder" type="imu_vn100_recorder" name="imu_recorder" output="log">
+    <param name="imu_record_file" value="$(arg data_dir)"/> <!-- where to record imu_data-->
+    <param name="publish_rpy"     value="true"/> <!-- whether to publish rpy -->
+  </node> 
+
+  <node pkg="sr4k_recorder" type="sr4k_recorder" name="sr4k_recorder" output="screen">
+    <param name="save_path_dir"   value="$(arg data_dir)/sr4k"/>
+    <param name="sr4k_model"      value="USB"/>
+    <param name="sr_data_version" value="old"/>
+    <param name="srcam_ip"        value="192.168.1.24"/> <!-- only works when sr4k_model is TCP-->
+  </node>
+
+</launch>
