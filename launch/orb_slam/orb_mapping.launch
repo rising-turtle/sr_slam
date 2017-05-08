@@ -1,0 +1,14 @@
+<launch>
+
+<node pkg="lsd_slam_viewer" type="viewer" name="viewer" output="screen" args="">
+</node>
+
+<node pkg="orb_slam" type="orb_map" name="orb_map" output="screen">
+  <param name="kf_file"       value="/home/davidz/work/ros_hydro_ws/devel/lib/orb_slam/traj_emad_kf.txt"/>
+
+  <param name="data_dir"      value="/home/davidz/work/data/real_sense/bigLoop/31"/> <!--31: emad 32: lingqiu , 35: out -->
+  <param name="data_dir"      value="/home/davidz/work/data/real_sense/04_04_2017_middle"/>
+  <param name="kf_file"       value="/home/davidz/work/ros_hydro_ws/devel/lib/orb_slam/table_loop/middle/orb-p/KeyFrameTrajectory.txt"/>
+</node>
+
+</launch>

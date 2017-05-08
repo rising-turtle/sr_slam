@@ -1,0 +1,62 @@
+<launch>
+
+<node pkg="sr_slam" type="sr_main_plane" name="sr_slam_plane" output="log">
+
+  <!-- sr4k data parameters -->
+  <param name="r200_dir"                  value="/media/work/work/data/realsense/etas_4f_down_swing_fast_01"/> <!-- 1st-->
+  <param name="r200_dir"        value="/home/davidz/work/data/real_sense/03_14_2017_etas_xytable"/> <!-- Q_desk_loop -->
+  <param name="r200_start"                value="100"/> <!-- notice: for matching timestamp in ground_truth, start should be 1 -->
+  <param name="r200_strip"                 value="3"/> <!-- strip between two rs frames to be implemented -->
+  <param name="r200_end"                  value="500"/> <!-- 3600 --> 
+
+  <param name="config/fixed_frame_name"       value="/map"/>
+  <param name="config/base_frame_name"        value=""/>
+  <param name="config/bagfile_name"           value=""/>
+
+  <param name="config/run_data"               value="RGBD_R200"/> <!-- realsense  run data type -->
+  <!-- display style -->
+  <!-- param name="config/cloud_display_type"             value="POINTS"  /-->
+
+  <!-- these two parameters control the performance of offline slam  -->
+  <param name="run_slam_offline"              value="true"/> <!-- in offline model, do not take motion speed into consideration-->
+  <param name="b_downsample_pc"               value="false"/> <!-- weather to downsample the point cloud -->
+  <param name="filter_voxel_size"             value="0.01"/> <!-- voxel grid size -->
+
+  <!-- keep good nodes, try to maintain the process if vro fails -->
+  <param name="config/keep_good_nodes"        value="true"/> <!-- true -->
+
+  <!-- display the 3D map, and reproject 2D point -->
+  <param name="config/store_pointclouds"      value="false"/> 
+  <param name="config/visualize_keyframes_only" value="true"/>
+  <param name="config/glwidget_without_clouds" value="false"/>
+  <param name="config/send_pc2_vis"           value="false"/>
+
+  <!-- Visual Features, to activate GPU-based features see CMakeLists.txt -->
+  <param name="config/feature_detector_type"         value="SIFT"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/feature_extractor_type"        value="SIFT"/><!-- If SIFTGPU is enabled in CMakeLists.txt, use SURF here -->
+  <param name="config/max_keypoints"                 value="500"/> <!-- maximum number of key points -->
+  <param name="config/min_keypoints"                 value="50"/><!-- Extract no less than this many ... -->
+  <param name="config/min_matches"                   value="12"/> <!-- Minimal number of matched features before RANSAC 29? -->
+  <param name="config/nn_distance_ratio"             value="0.5"/> <!-- 0.5 for SIFT, 0.95 for SIFTGPU Feature correspondence is valid if distance to nearest neighbour is smaller than this parameter times the distance to the 2nd neighbour. This needs to be 0.9-1.0 for SIFTGPU w/ FLANN, since SIFTGPU Features are normalized-->
+
+  <param name="config/max_dist_for_inliers"         value="0.5" /> <!-- 0.05 6 3 "Mahalanobis distance for matches to be considered inliers by ransac"-->
+  <param name="config/ransac_iterations"            value="20000" /> <!-- "Number of iterations for registration" -->
+  <param name="config/b_ransac_fixed_iter"           value="false"/> <!-- weather to use fixed   -->
+
+  <!-- sift and siftgpu parameters -->
+  <param name="sift_num_features"                   value="0" /> <!-- 0 number of returned sift features -->
+  <param name="sift_octave_layers"                  value="3" /> <!-- 3 number octave layers -->
+  <param name="sift_contrast_threshold"             value="0.08" /> <!-- 0.1 0.08 initial threshold for keypint detection -->
+  <param name="siftgpu_contrast_threshold"          value="0.0018" /> <!-- 0.0018 0.0008 initial DOG threshold for siftgpu -->
+  <!-- param name="siftgpu_edge_threshold"              value="10." /--> <!-- edge threshold for siftgpu  -->
+
+  <!-- Algortithm settings -->
+  <param name="config/optimizer_skip_step"    value="20" /><!-- 20 Optimize every n-th frame. Set negative for offline operation -->
+  <param name="config/min_translation_meter"         value="0.1"/><!-- 0.08 0.05 frames with motion less than this, will be omitted -->
+  <param name="config/min_rotation_degree"           value="2"/><!-- 3 2 frames with motion less than this, will be omitted -->
+  <param name="config/predecessor_candidates"        value="5"/><!-- 5 search through this many immediate predecessor nodes for corrspondences -->
+  <param name="config/neighbor_candidates"           value="0"/><!-- 5 search through this many graph neighbour nodes for corrspondences -->
+  <param name="config/min_sampled_candidates"        value="0"/><!-- 5 search through this many uniformly sampled nodes for corrspondences -->
+  <param name="config/max_connections"               value="5"/><!-- 10 -1 stop after this many succesfully found spation relations -->
+</node>
+</launch>

@@ -1,12 +1,15 @@
 <launch>
 
 <arg name="data_dir" default="/home/davidz/work/data/SwissRanger4000/exp/dataset_82"/> <!-- 82 -->
+
+<!-- arg name="data_dir" default="/home/davidz/work/data/SwissRanger4000/imu_bdat/etas_f5/sr4k"/--> <!-- 82 -->
+
 <!-- env name="ROSCONSOLE_CONFIG_FILE" value="/home/davidz/work/ros_hydro_ws/src/sr_slam/launch/vro_console.config" / -->
 
 <node pkg="sr_slam" type="test_vro" name="test_vro" output="screen">
 
   <param name="config/max_dist_for_inliers"          value="0.05"/> <!-- 0.05 "Mahalanobis distance for matches to be considered inliers by ransac"-->
-  <param name="config/ransac_iterations"             value="1000" /> <!-- 200 -->
+  <param name="config/ransac_iterations"             value="200" /> <!-- 200 -->
   <param name="config/b_ransac_fixed_iter"           value="true"/> <!-- weather to use fixed   -->
   <param name="config/store_pointclouds"  value="true"/>
 

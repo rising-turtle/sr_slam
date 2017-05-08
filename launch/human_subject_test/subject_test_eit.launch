@@ -95,7 +95,7 @@
   <param name="config/min_matches"                   value="10"/> <!-- Minimal number of matched features before RANSAC 29? -->
   <param name="config/nn_distance_ratio"                    value="0.95"/> <!-- 0.5 Feature correspondence is valid if distance to nearest neighbour is smaller than this parameter times the distance to the 2nd neighbour. This needs to be 0.9-1.0 for SIFTGPU w/ FLANN, since SIFTGPU Features are normalized-->
 
-  <param name="config/max_dist_for_inliers"         value="0.05" /> <!--9 6 3 "Mahalanobis distance for matches to be considered inliers by ransac"-->
+  <param name="config/max_dist_for_inliers"         value="0.05" /> <!--0.05 9 6 3 "Mahalanobis distance for matches to be considered inliers by ransac"-->
   <param name="config/vro_strategy"                 value="vro_my" /> <!-- " VRO strategy: VRO_ori, VRO_my, VRO_plane, VRO_plane_em" -->
   <param name="config/ransac_iterations"                   value="2000" /> <!-- "Number of iterations for registration" -->
 
