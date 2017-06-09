@@ -1,0 +1,29 @@
+To make rgbdslam_v2 work in indigo:
+3/10/2015 - 3/14/2015
+  1 substitute the FindG2O.cmake with groovy version of rgbdslam, in my yesterday_code/rgbdslam/cmake_modules, set G2O_ROOT as where the g2o is installed 
+  2 compile the OpenCV 2.4.10, which need to replace the system.cpp with this one https://github.com/Itseez/opencv/blob/2.4/modules/core/src/system.cpp as described in http://answers.opencv.org/question/45836/problem-in-installing-opencv-in-ubntu-1204-32-bit-system/
+  3 find the GLU include directories, in the EXTERNEL/SiftGPU 
+  4 comment /usr/lib/libcxsparse.so.2.2.3, instead /usr/lib/i386-linux-gnu/libcxsparse.so.3.* which the g2o library links to 
+  5 delete the code "tf_msg->__connection_header" in the line 221-222 of the file "openni_listener.cpp"
+  6 g2o_solver is not compatible because "compiling g2o before install suitesparse-dev", so need to recompile it! 
+  7 pcl-1.7 not compatible with rgbdslam_v2, because rgbdslam_v2' CMAKE_CXX_FLAGS has -std=c++0x but pcl-1.7 standalone doesnot has -std=c++0x, which cause the segmentation fault when running rgbdslam by linking to pcl-1.7, so, have to recompile pcl-1.7 with -std=c++0x flag, as described in 
+  https://github.com/PointCloudLibrary/pcl/issues/780
+  https://github.com/felixendres/rgbdslam_v2/issues/8
+  https://github.com/PointCloudLibrary/pcl/issues/980
+  8 OpenNI headers cannot work under this flag, so have to hack the file /usr/include/XnPlatform.h line 74, comment "#error ...", but instead add #include "Linux-x86/XnPlatformLinux-x86.h" 
+  9 rgbdslam may also need other pcl libraries such as libpcl_apps.so, which actually not be used when run rgbdslam 
+
+  10 run bagrgbd.launch, no image, because the message in the bag is different from the parameters in the launch, edit them to be coherent, then it works
+
+  11 : build opencv with CUDA, error -> set arch
+  CMake .. -DCUDA_ARCH_BIN="3.0", it works for me when compiling opencv 2.4.10 
+
+  12: uncompatible lib error when link libsiftgpu, have to rebuild it in the 64bit OS. 
+
+3/15/2015 - 3/18/2015
+11 three days work: g2o run error, and many g2o::functions not work, because of this definition "add_definitions(${PCL_DEFINITIONS})" in CMakeLists.txt, this cause all the troubles, Thank God! 
+
+4/1/2015 
+1 change into ubuntu 14.04.2 64 bit system, link error undefined reference to "g2o::csparse_extension::cs_chol_workspace(***)" ... 
+  This is because the (g2o)/EXTERNAL/csparse/cs.h is conflict with that /usr/include/suitesparse/cs.h, which will result in the undefined function problem, !NOTICE: not the function name is wrong, but rather the parameter type is not consistent, careful. 
+  BTW, use nm -gD ***.so to check the exported functions and their parameters

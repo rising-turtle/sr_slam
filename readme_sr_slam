@@ -1,0 +1,4 @@
+  3/22/2015
+1 compile error, because in the rgbdslam source dir, exist a file called features.h, which all the c++ stdlib will include in hunderds of c++ std file, that results in the numberous errors of UNDEFIED etc. 
+2 By copying all the *.h files from ${ROS_ROOT}/rgbdslam_v2/src to ${ROS_ROOT}/rgbdslam_v2/include and deleting the "features.h" file, it works. 
+3 the ori_rgbd.cpp has to be slightly altered to make it successfully compiled. 
