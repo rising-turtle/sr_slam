@@ -117,7 +117,9 @@ void matchTwoFrames()
   // cam_info.height = 240; 
 
   // CamModel cam_info(606.508/2, 607.075/2, 316.00/2, 244.682/2, 0.11064, -0.55174);
-  CamModel cam_info(606.508, 607.075, 316.00, 244.682, 0.11064, -0.55174);
+  // CamModel cam_info(606.508, 607.075, 316.00, 244.682, 0.11064, -0.55174);
+  
+  CamModel cam_info(581.902, 581.902, 319.5, 239.5); 
   cam_info.width = 640; // 320 
   cam_info.height = 480;  // 240
 
@@ -179,11 +181,11 @@ void generatePC( pointcloud_type::Ptr& pc, Mat& rgb, Mat& depth, CamModel& cam)
     // PointCloud::Ptr cloud ( new PointCloud );
     // 遍历深度图
     //
-    double camera_factor = 1000; 
-    double camera_fx = 316.00314 ; 
-    double camera_fy = 244.68197 ; 
-    double camera_cx = 606.50798 ; 
-    double camera_cy = 607.07558 ; 
+    double camera_factor = 0.001; 
+    double camera_fx = 581.902; // 316.00314 ; 
+    double camera_fy = 581.902; // 244.68197 ; 
+    double camera_cx = 319.5; // 606.50798 ; 
+    double camera_cy = 239.5; // 607.07558 ; 
     double dx, dy, dz; 
     for (int m = 0; m < depth.rows; m++)
         for (int n=0; n < depth.cols; n++)
@@ -198,7 +200,7 @@ void generatePC( pointcloud_type::Ptr& pc, Mat& rgb, Mat& depth, CamModel& cam)
             point_type p; 
 
             // 计算这个点的空间坐标
-            p.z = double(d) / camera_factor;
+            p.z = double(d) * camera_factor;
             dz = p.z; 
 
             cam.convertUVZ2XYZ(n, m, dz, dx, dy, dz); 
@@ -227,7 +229,7 @@ bool loadImg(string dir, int id, cv::Mat& rgb, cv::Mat& dpt)
 {
   stringstream ss_rgb, ss_dpt; 
   ss_rgb << dir<<"/color/"<<setfill('0')<<setw(6)<<id<<".png";
-  ss_dpt << dir<<"/depth/"<<setfill('0')<<setw(6)<<id<<".png";
+  ss_dpt << dir<<"/depth/"<<setfill('0')<<setw(6)<<id<<".pgm"; // ".png"
   ROS_INFO("rgb_file = %s", ss_rgb.str().c_str()); 
   ROS_INFO("dpt_file = %s", ss_dpt.str().c_str());
 

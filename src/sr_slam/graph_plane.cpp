@@ -210,7 +210,10 @@ void CGraphPlane::loadR200RGBDAsync()
   // cam_info.width = 320; 
   // cam_info.height = 240; 
 
-  CamModel cam_info(606.508, 607.075, 316.00, 244.682, 0.11064, -0.55174); // F200 
+  // CamModel cam_info(606.508, 607.075, 316.00, 244.682, 0.11064, -0.55174); // F200 
+
+  CamModel cam_info(581.902, 581.902, 319.5, 239.5);
+  
   cam_info.width = 640; 
   cam_info.height = 480; 
 
@@ -218,7 +221,7 @@ void CGraphPlane::loadR200RGBDAsync()
   {
     stringstream ss_rgb, ss_dpt; 
     ss_rgb << rs_data_dir<<"/color/"<<setfill('0')<<setw(6)<<i<<".png"; 
-    ss_dpt << rs_data_dir<<"/depth/"<<setfill('0')<<setw(6)<<i<<".png"; 
+    ss_dpt << rs_data_dir<<"/depth/"<<setfill('0')<<setw(6)<<i<<".pgm";  //"png" 
     
     cv::Mat rgb = cv::imread(ss_rgb.str().c_str(), -1); 
     cv::Mat dpt = cv::imread(ss_dpt.str().c_str(), -1); 
