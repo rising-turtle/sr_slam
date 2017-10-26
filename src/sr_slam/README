@@ -1,0 +1,103 @@
+
+Program function
+
+# test_plane_3d.cpp:
+  input: graph.g2o
+  output: single_incremental_plane3d_opt.g2o
+  function: inrementally add floor plane into g2o for optimization, and save the result into single_incremental_plane3d_opt.g2o
+  Note: it requires the z axis of the global coordinate is perpendicular to the floor plane 
+
+# test_mul_plane_3d.cpp:
+  input: graph.g2o
+  output: g2o_increments/g*_before.g2o new_incremental_plane3d_opt_before.g2o, new_incremental_plane3d_opt_opt.g2o, 
+  function: incrementally add plane features to g2o, optimizes g2o and saves the result in g2o_increments/g*_before.g2o. In the end, saving the g2o structure before and after optimization, into new_incremental_plane3d_opt_before.g2o and new_incremental_plane3d_opt_opt.g2orespectively. 
+  We extract planes from point cloud data (quicksave_*.pcd), and transform the computed normal vector of the planes into the global coordinate system. Then by checking the nz component of the plane's normal vector, we distinguish whether this plane is a floor or a wall plane. 
+  Additionally, the wall planes are initialized using the location and orientation denoted in the 2D floor plan. The floor plane is initialized as the one extracted from point cloud of the start point. 
+
+# test_map_g2o.cpp:
+  input: graph.g2o 
+  output: map3d.pcd octomap3d.bt
+  function: generate final map (PCL Octomap) using the trajectory in graph.g2o and quicksave_*.pcd
+
+# test_traj_length.cpp:
+  input: [*].g2o 
+  output: estimate approximate length of the 3D & 2D (x, y) trajectory 
+
+# test_g2o_prior3d.cpp:
+  input: vertex_2d.log
+  output: replace_result.g2o
+  function: treat estimation from 2D Line based slam as prior3D measurement in the 3D plane based slam, which is optimizied and saved 
+
+# test_g2o_prior3d_jacobian.cpp:
+  function: test jacobian matrix 
+
+# test_clip_z.cpp: 
+  input: incremental_plane3d_opt.g2o (floor_plane + wall plane), single_incremental_plane3d_opt.g2o (single floor plane)
+  output: plane3d_opt.g2o 
+  function: use pose' z (x, y, z) value from single_incremental_plane3d_opt to set the pose' z (x, y, z) value from incremental_plane3d_opt, and then save the result into plane3d_opt 
+  
+# test_g2o_edgese2line.cpp:
+  function: simulate 2D line based graph optimization, specifically for the class EdgeSE2Line2DZH. 
+
+# test_g2o_euler3.cpp:
+  input: [graph].g2o
+  output: graph_euler2.g2o
+  function: convert the type of graph's edge from EdgeSE3 (Quaternion) to EdgeSE3Euler2ZH (Euler). It seems that invert conversion has ssome bug, especially in the copyEdge<EdgeSE3Euler2ZH>. 
+
+# test_graph.cpp:
+  output: test_graph.log
+  function: test Sophus::SE3d based graph structure
+
+# test_gt.cpp:
+  input: gt_file gt_file_cp
+  function: print out the difference between the estimated trajectory and the groundtruth, and generate a final 3D point cloud using groundtruth and quicksave_*.pcd
+
+# test_gyro_display.cpp:
+  function: draw a 3D cube in opengl
+  
+# test_publish_g2o.cpp:
+  function: test publish (x,y,yaw) components of 3D pose 
+
+# test_sift.cpp:
+  function: test number of sift features 
+
+# test_vo_rs.cpp:
+  input: two RS type files
+  output: compute vro result give two RS data
+
+# test_vro.cpp:
+  input: two SR4000 frames or two folders that contain SR4000 frames
+  output: For VRO, estimated transformation T; for VRO pack, mean and std of the estimated (x, y, z, roll, pitch, yaw)
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

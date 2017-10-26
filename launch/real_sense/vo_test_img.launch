@@ -5,14 +5,15 @@
   <param name="img_dir"        value="/media/work/work/data/realsense/Q_desk_loop"/> <!-- Q_desk_loop -->
   <param name="img_dir"        value="/media/work/work/data/realsense/etas_4f_down_swing_slow_01"/> <!-- Q_desk_loop -->
   <param name="img_dir"        value="/home/davidz/work/data/real_sense/03_14_2017_etas_xytable"/> <!-- Q_desk_loop -->
-
-  <param name="img_from"                          value="214" />
-  <param name="img_to"                          value="210" />
+  <param name="img_dir"        value="/home/davidz/work/data/real_sense/R200"/>
+ 
+  <param name="img_from"                          value="104" />
+  <param name="img_to"                          value="100" />
   <param name="show_point_cloud"                  value="true"/>
   <param name="config/store_pointclouds"      value="true"/> 
   <!-- sift parameters -->
   <param name="sift_num_features"                   value="0" /> <!-- number of returned sift features -->
-  <param name="sift_octave_layers"                  value="3" /> <!-- number octave layers -->
+  <param name="sift_octave_layers"                  value="5" /> <!-- number octave layers -->
   <param name="sift_contrast_threshold"             value="0.08" /> <!-- 0.04 initial threshold for keypint detection -->
   <param name="siftgpu_contrast_threshold"          value="0.0018" /> <!-- 0.0018 0.0008 initial DOG threshold for siftgpu -->
   <!-- param name="siftgpu_edge_threshold"              value="10." /--> <!-- edge threshold for siftgpu  -->
