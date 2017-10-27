@@ -30,6 +30,7 @@ class CPlaneExtract
 
     float getPitchByGround(Eigen::Vector4f& nv); // align plane to the ground, and extract pitch angle 
     float getPitchByGround(CloudPtr& in); // align plane to the ground, and extract pitch angle 
+    float getTransByGround(CloudPtr& in, Eigen::Matrix<float, 4, 4>& rR); // align plane to the ground, and return the rotation matrix
 
     double nx_; 
     double ny_;

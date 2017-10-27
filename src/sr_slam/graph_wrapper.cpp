@@ -833,7 +833,7 @@ bool CGraphWrapper::firstNode(Node* new_node)
     //            z                            z   x
     //           /                             |  /
     //          /                              | /
-    //         /----- x                 y ---- |/
+    //         /----- x         y ---- |/
     //         |                             Global
     //         |                                     
     //         | y
@@ -894,8 +894,11 @@ bool CGraphWrapper::firstNode(Node* new_node)
       if(pn->pc_col->points.size() > 0) // store points 
       {
          CPlaneExtract<point_type> floor_extracter;
-         float tmp = floor_extracter.getPitchByGround(pn->pc_col);
-         if(tmp != 0) // succeed to set the pitch angle 
+         // float tmp = floor_extracter.getPitchByGround(pn->pc_col);
+         Eigen::Matrix<float, 4, 4> rR;
+	  float tmp = floor_extracter.getTransByGround(pn->pc_col, rR); 
+		 
+         if(tmp != 0.) // succeed to set the pitch angle 
          {
             pitch = tmp; 
             ROS_ERROR("graph_wrapper.cpp: compute the initial pitch angle: %f", R2D(tmp));
@@ -943,12 +946,21 @@ bool CGraphWrapper::firstNode(Node* new_node)
             //          |
             //          | y
             // this rotate around x-axis 
-            tf::Matrix3x3 R_b2o;
-            // R_original(1,1) = cp;   R_original(1,2) = -sp;
-            // R_original(2,1) = sp;   R_original(2,2) = cp;
-            R_b2o.setValue(1, 0, 0, 
-                           0, cp, -sp, 
-                           0, sp, cp);
+
+	     tf::Matrix3x3 R_b2o;
+            // R_b2o.setValue(1, 0, 0, 
+           //                0, cp, -sp, 
+           //                0, sp, cp);
+
+	    // assign R measurement 
+	    for(int i=0; i<3; i++)
+		for(int j=0; j<3; j++)
+		{
+			R_b2o[i][j] = rR(i,j);
+		}
+	    
+
+	    ///// transform nv of the plane to {0, 1, 0}
 
             // T_b2o = eigenTransf2TF(R_original); // get transformation from base to origin 
             T_b2o = tf::Transform(R_b2o);

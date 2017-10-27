@@ -112,12 +112,10 @@ float CPlaneExtract<PointT>::getPitchByGround(CloudPtr& in)
 
   if(!extract(filtered, nv))
   {
-    return -1; 
+    return 0.0; 
   }
   float pitch =  getPitchByGround(nv);
   
-
-  /*
   // for debug 
   Eigen::Matrix4f R = Eigen::Matrix4f::Identity();
   float cp = cos(pitch); float sp = sin(pitch); 
@@ -131,11 +129,67 @@ float CPlaneExtract<PointT>::getPitchByGround(CloudPtr& in)
 
   // Eigen::Vector4f tran_v = R.inverse()*nv; 
   Eigen::Vector4f tran_v = R*nv; 
+
   ROS_ERROR("plane_extract.hpp: before R %f %f %f", nv(0), nv(1), nv(2)); 
   ROS_ERROR("plane_extract.hpp: after R %f %f %f", tran_v(0), tran_v(1), tran_v(2)); 
-*/
+
+  Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
+  R2(0, 0) = tran_v(1); R2(0, 1) = -tran_v(0);
+  R2(1, 0) = tran_v(0); R2(1, 1) = tran_v(1); 
+  nv = R2*tran_v; 
+  ROS_ERROR("plane_extract.hpp: before R2 %f %f %f", tran_v(0), tran_v(1), tran_v(2));
+  ROS_ERROR("plane_extract.hpp: after R2 %f %f %f", nv(0), nv(1), nv(2)); 
+
   return pitch; 
 }
+
+template<typename PointT>
+float CPlaneExtract<PointT>::getTransByGround(CloudPtr& in, Eigen::Matrix<float, 4, 4>& rR) // align plane to the ground, and return the rotation matrix
+{
+  Eigen::Vector4f nv; 
+  // filter first 
+  CloudPtr filtered(new Cloud); 
+  // filterPointCloud(in, filtered);
+  nanFilter(in, filtered);
+
+  if(!extract(filtered, nv))
+  {
+    return 0.0; 
+  }
+  float pitch =  getPitchByGround(nv);
+  
+  // for debug 
+  Eigen::Matrix4f R = Eigen::Matrix4f::Identity();
+  float cp = cos(pitch); float sp = sin(pitch); 
+  // this rotate around x axis 
+  R(1,1) = cp; R(1,2) = -sp; 
+  R(2,1) = sp; R(2,2) = cp; 
+    
+  // this rotate around y axis 
+  // R(2,2) = cp; R(0,2) = -sp; 
+  // R(2,0) = sp; R(0,0) = cp;
+
+  // Eigen::Vector4f tran_v = R.inverse()*nv; 
+  Eigen::Vector4f tran_v = R*nv; 
+
+  // ROS_ERROR("plane_extract.hpp: before R %f %f %f", nv(0), nv(1), nv(2)); 
+  // ROS_ERROR("plane_extract.hpp: after R %f %f %f", tran_v(0), tran_v(1), tran_v(2)); 
+
+  Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
+  R2(0, 0) = tran_v(1); R2(0, 1) = -tran_v(0);
+  R2(1, 0) = tran_v(0); R2(1, 1) = tran_v(1); 
+  // nv = R2*tran_v; 
+  // ROS_ERROR("plane_extract.hpp: before R2 %f %f %f", tran_v(0), tran_v(1), tran_v(2));
+  // ROS_ERROR("plane_extract.hpp: after R2 %f %f %f", nv(0), nv(1), nv(2)); 
+  rR = R2 * R; 
+
+  tran_v = rR * nv; 
+  ROS_ERROR("plane_extract.hpp: before R %f %f %f", nv(0), nv(1), nv(2)); 
+  ROS_ERROR("plane_extract.hpp: after R %f %f %f", tran_v(0), tran_v(1), tran_v(2)); 
+  
+  return pitch; 
+}
+
 /*
 template<typename PointT>
 float CPlaneExtract<PointT>::getPitchByGround(Eigen::Vector4f& nv) // align plane to the ground, and extract pitch angle 
