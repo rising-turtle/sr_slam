@@ -159,7 +159,7 @@ CNodeWrapper::CNodeWrapper(const cv::Mat& visual,
            cv::Ptr<cv::FeatureDetector> detector,
            cv::Ptr<cv::DescriptorExtractor> extractor)
     : Node(visual, depth, detection_mask, cam_info, depth_header, detector, extractor),
-    gt_has_been_set_(false)
+    gt_has_been_set_(false), mpCamModel(NULL)
 {
     // Init();
 }
@@ -170,7 +170,7 @@ CNodeWrapper::CNodeWrapper(const cv::Mat visual,
            pointcloud_type::Ptr point_cloud,
            const cv::Mat detection_mask)
     : Node(visual, detector, extractor, point_cloud, detection_mask),
-    gt_has_been_set_(false)
+    gt_has_been_set_(false), mpCamModel(NULL)
 {
     // Init();
 }
@@ -192,6 +192,11 @@ CNodeWrapper::CNodeWrapper(const cv::Mat& visual,
     Init(depth_header);
     ParameterServer* ps = ParameterServer::instance();
   
+    if(mpCamModel == NULL)
+    {
+      mpCamModel = new CamModel;
+      *mpCamModel = cam_model;
+    }
     d_rows_ = cam_model.height; 
     d_cols_ = cam_model.width;
     d_N_ = d_rows_*d_cols_;
@@ -209,6 +214,21 @@ CNodeWrapper::CNodeWrapper(const cv::Mat& visual,
       pt.x = pct.x; pt.y = pct.y; pt.z = pct.z; 
     }
     featureInit(visual, depth, detection_mask, depth_header, tmp_cloud, detector, extractor);
+}
+
+bool CNodeWrapper::regainPointCloud()
+{
+  if(mpCamModel == NULL) return false; 
+
+  // 1. read images 
+  cv::Mat rgb = cv::imread(m_frgb.c_str(), -1); 
+  cv::Mat dpt = cv::imread(m_fdpt.c_str(), -1); 
+  if(!rgb.data || !dpt.data)
+    return false; 
+  
+  // 2. 
+  pc_col = pointcloud_type::Ptr(createXYZRGBPointCloud(rgb, dpt, *mpCamModel ));
+  return true;
 }
 
 CNodeWrapper::CNodeWrapper(const cv::Mat& visual, 
@@ -371,6 +391,11 @@ CNodeWrapper::~CNodeWrapper()
         gicp_point_set_ = NULL;
     }
 #endif
+    if(mpCamModel != NULL)
+    {
+      delete mpCamModel; 
+      mpCamModel = NULL;
+    }
   // ROS_WARN("NodeWrapper.cpp: after ~CNodeWrapper()!");
 }
 
@@ -1172,6 +1197,7 @@ void CNodeWrapper::Init(std_msgs::Header& depth_header)
     odom_transform_ = tf::StampedTransform(tf::Transform::getIdentity(), depth_header.stamp, "missing_odometry", depth_header.frame_id);
     initial_node_matches_ = 0; 
     gt_has_been_set_ = false;
+    mpCamModel = NULL; 
 }
 
 /*

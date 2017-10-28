@@ -245,6 +245,7 @@ void CGraphPlane::loadR200RGBDAsync()
       // rsCallback(*rs_frame);
       // skCallback(sr_frame);
       Node* pnew_node = fromRGBD(rgb, dpt, cam_info); 
+      pnew_node->setCamFrameFile(ss_rgb.str(), ss_dpt.str()); 
       processNode(pnew_node); 
       // sr_frame = sr_reader_->get_current_frame(finished); 
     }catch(...)

@@ -17,6 +17,8 @@
 
 using namespace std;
 
+class CamModel;
+
 typedef pcl::PointXYZ sr_point_type; 
 typedef pcl::PointCloud<sr_point_type> sr_cloud_type; 
 typedef typename sr_cloud_type::Ptr sr_cloudPtr; 
@@ -89,6 +91,11 @@ public:
         virtual ~CNodeWrapper();
         CNodeWrapper(const CNodeWrapper&);
         CNodeWrapper& operator=(const CNodeWrapper&);
+
+        // compute point cloud by loading images from image file
+        virtual bool regainPointCloud(); 
+        CamModel* mpCamModel; 
+
         void Init(std_msgs::Header&);
         void featureInit(const cv::Mat& visual, 
            const cv::Mat& depth,

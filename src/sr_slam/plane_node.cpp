@@ -1129,6 +1129,9 @@ double CPlaneNode::errorFunctionSR4kNew(Eigen::Vector3f& x1, Eigen::Vector3f& x2
   Eigen::Vector3d mu_2 = x_2.head<3>();
   Eigen::Vector3d mu_1_in_frame_2 = (tf_12 * x_1).head<3>(); // 
   double delta_sq_norm = (mu_1_in_frame_2 - mu_2).squaredNorm();
+
+  // ROS_INFO_STREAM("plane_node.cpp: delta_sq_norm: "<<delta_sq_norm<<" mu_2: "<<mu_2(0)<<" "<<mu_2(1)<<" "<<mu_2(2)<<
+  //	" mu_1_in_frame_2: "<<mu_1_in_frame_2(0)<<" "<<mu_1_in_frame_2(1)<<" "<<mu_1_in_frame_2(2));
   return delta_sq_norm;
 }
 
@@ -1310,6 +1313,7 @@ void CPlaneNode::computeInliersAndErrorWithProj(const CPlaneNode* old_node, std:
         ROS_ERROR("plane_node.cpp: M_dis < 0 : %lf", min_dis); 
         continue;
        }
+      // ROS_INFO("plane_node.cpp: find a inlier min_dis: %f, dis_threshold: %f", min_dis, dis_threhsold);
       mean_error += min_dis; 
       inliers.push_back(m);
       code_src.push_back(code_src_i); 
