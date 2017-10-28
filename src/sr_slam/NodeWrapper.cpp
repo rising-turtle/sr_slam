@@ -436,6 +436,7 @@ void CNodeWrapper::featureInit(const cv::Mat& visual,
            cv::Ptr<cv::DescriptorExtractor> extractor)
 {
     ParameterServer* ps = ParameterServer::instance();
+    static int save_first_pc = 0;
    
     //Create point cloud inf necessary
     if(ps->get<bool>("store_pointclouds") || 
@@ -462,7 +463,8 @@ void CNodeWrapper::featureInit(const cv::Mat& visual,
     }else // empty pc 
     {
         // ROS_INFO("pc_col = empty!");
-        pc_col = pointcloud_type::Ptr(new pointcloud_type());
+        if(save_first_pc++ > 0)
+	        pc_col = pointcloud_type::Ptr(new pointcloud_type());
     }
     pc_col->header = header_;
     
@@ -685,7 +687,7 @@ bool CNodeWrapper::sr_projectTo3D(std::vector<cv::KeyPoint>& feature_locations_2
     // sr_point_type& pt = pc->points[index]; 
     sr_point_type& pt = pc->at(u,v);
     X = pt.x ; Y = pt.y; Z = pt.z; 
-    if(std::isnan (Z) || std::isnan(X) || std::isnan(Y))
+    if(std::isnan (Z) || std::isnan(X) || std::isnan(Y) || Z < 0.01)
     {
       // ROS_DEBUG("Feature %d has been extracted at NaN depth. Omitting", i);
       //FIXME Use parameter here to choose whether to use
@@ -729,7 +731,7 @@ void CNodeWrapper::sr_projectTo3DSiftGPU(std::vector<cv::KeyPoint>& feature_loca
 
     p2d = feature_locations_2d[i].pt;
     sr_point_type& p3d = point_cloud->at((int) p2d.x,(int) p2d.y);
-    if (std::isnan(p3d.z))
+    if (std::isnan(p3d.z) || p3d.z < 0.01)
     {
       // ROS_INFO("Feature %d has been extracted at NaN depth. Using pixel coordinates", i);
       feature_locations_2d.erase(feature_locations_2d.begin()+i);
