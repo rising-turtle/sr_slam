@@ -477,6 +477,12 @@ void CNodeWrapper::featureInit(const cv::Mat& visual,
       gray_img = visual;
     }
 
+    // try histogram equalization 
+    cv::Mat img; 
+    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(3.0, cv::Size(8, 8));
+    clahe->apply(gray_img, img);
+    gray_img = img;
+
 #ifdef USE_SIFT_GPU
     std::vector<float> descriptors;
     if(ps->get<std::string>("feature_detector_type") == "SIFTGPU"){

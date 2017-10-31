@@ -103,6 +103,10 @@ target_link_libraries(test_plane_3d g2o_edge_zhadds ${G2O_LIBRARIES} g2o_types_s
 add_executable(test_mul_plane_3d test_mul_plane_3d.cpp)
 target_link_libraries(test_mul_plane_3d g2o_edge_zhadds ${G2O_LIBRARIES} g2o_types_slam3d_addons sr_plane sr_timer ${PCL_LIBRARIES})
 
+#### 3.1 for test plane_slam: incrementally use multiple planes to optimize the graph without prior wall planes ####
+add_executable(test_plane_slam test_plane_slam.cpp)
+target_link_libraries(test_plane_slam g2o_edge_zhadds ${G2O_LIBRARIES} g2o_types_slam3d_addons sr_plane sr_timer ${PCL_LIBRARIES})
+
 ### 1.3/2.2 for test map3d using g2o : generate octomap using g2o/pcds ####
 add_executable(test_map3d_g2o test_map_g2o.cpp)
 target_link_libraries(test_map3d_g2o g2o_edge_zhadds ${G2O_LIBRARIES} g2o_types_slam3d_addons sr_plane ${PCL_LIBRARIES} octomap_local ${OCTOMAP_LIBS})
