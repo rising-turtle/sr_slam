@@ -3,7 +3,8 @@
  *
  *  implement Plane based SLAM, 
  *  input: the VO's estimation, *.g2o [pcds]/quick_save*.pcd
- *  output: incrementally add plane features into the graph structure, and 
+ *  output: plane_slam_opt.g2o
+ *          incrementally add plane features into the graph structure, and 
  *          save the result of graph optimization into plane_slam.g2o
  * */
 
@@ -158,6 +159,7 @@ void addPlaneIncrementally(SparseOptimizer* op)
     
     if(++cnt % 5 == 0)
     {
+      pg->setVerbose(true);
       pg->initializeOptimization(); 
       pg->optimize(5);
     }
@@ -165,19 +167,20 @@ void addPlaneIncrementally(SparseOptimizer* op)
   }
 
   // save g2o structure 
-  pg->save("plane_slam_opt_before.g2o");
+  pg->save("plane_slam_opt.g2o");
   // delete op; 
-  pg->setVerbose(true);
-  pg->initializeOptimization(); 
-  int result_op = pg->optimize(5); 
-  pg->save("plane_slam_opt_after.g2o");
+  // pg->setVerbose(true);
+  // pg->initializeOptimization(); 
+  // int result_op = pg->optimize(5); 
+  // pg->save("plane_slam_opt_after.g2o");
   return ;
 }
 
 bool add_plane_node_incrementally(CloudPtr& pc, int node_id, SparseOptimizer* op, map<int, vector<int> >& plane_map)
 {
   CPlaneSet p_pSet; 
-  int num_p = p_pSet.extractPlanes(pc); 
+  int num_p = p_pSet.extractPlanes(pc, 0.04); 
+  printf("%s Extract %d planes from node : %d\n",__FILE__, num_p, node_id); 
   if(num_p == 0) return false;
 
   // compute the normal vector of the extracted planes
@@ -188,11 +191,9 @@ bool add_plane_node_incrementally(CloudPtr& pc, int node_id, SparseOptimizer* op
     CPlane* p_plane = p_pSet.planeAt(i); 
     // Plane3D 
     v << p_plane->nx_, p_plane->ny_, p_plane->nz_, p_plane->d1_; 
-    // ouf<<v(0)<<" "<<v(1)<<" "<<v(2)<<" "<<v(3)<<" ";   // plane parameter in local reference 
     Plane3D* tmp_p = new Plane3D();
     tmp_p->fromVector(v); 
     pVec[i] = tmp_p; 
-    // ouf<<v(0)<<" "<<v(1)<<" "<<v(2)<<" "<<v(3)<<" ";// plane parameter in local reference    
   }
   
   static bool first_node = true; 
@@ -235,14 +236,20 @@ bool add_plane_node_incrementally(CloudPtr& pc, int node_id, SparseOptimizer* op
 
       int plane_associated = planeAssociate(*pVec[i], node_id, op, plane_map);
       // if(planeAssociate(*pVec[i], id, op, plane_map) >= 0) // associate with old plane
-      if(plane_associated >= 0)
+      Eigen::Vector4d l_coeff = pVec[i]->coeffs();
+      Eigen::Vector4d g_coeff = g_plane.coeffs(); 
+      // printf(KWHT "%s current plane %d lp: %f %f %f %f  gp: %f %f %f %f \n", __FILE__, i, l_coeff(0), l_coeff(1),
+      //    l_coeff(2), l_coeff(3), g_coeff(0), g_coeff(1), g_coeff(2), g_coeff(3)); 
+      if(plane_associated >= 0) // associate with old plane
       {
         plane_ids[i] = plane_associated; 
         b_old_plane_observed = true; 
+        // printf(KGRN "%s current plane associates with plane id: %d\n", __FILE__, plane_associated); 
       }else  // create a new plane and add it into the graph structure 
       {
          add_plane_node_impl(op, &g_plane, plane_id, false); 
          add_plane_edge_impl(op, pVec[i], node_id, plane_id, g_offset_id);
+         // printf(KRED "%s current plane is new, set id: %d \n", __FILE__, plane_id);
          // new_plane.push_back(plane_id++); 
          plane_ids[i] = plane_id++;
       }
@@ -274,7 +281,7 @@ void add_plane_edge_impl(SparseOptimizer* op, Plane3D* obs, int node_id, int pla
   Eigen::Matrix3d w_m = Eigen::Matrix3d::Zero(); 
   w_m(0,0) = 100;  // aminth contribution
   w_m(1,1) = 100;   // elevation 
-  w_m(2,2) = 1000; 
+  w_m(2,2) = 10000; 
 
   e->setInformation(w_m); 
   op->addEdge(e);
@@ -332,9 +339,9 @@ int planeAssociate(Plane3D lp, int node_id, SparseOptimizer* op, map<int, vector
       {
         if(pret == REVERSE) // need reverse plane measurement
         {
-          v1 = lp.toVector(); 
-          v1 = v1 * -1.;
-          lp.fromVector(v1); 
+          v2 = lp.toVector(); 
+          v2 = v2 * -1.;
+          lp.fromVector(v2); 
         }
         
         // add plane edge into graph 

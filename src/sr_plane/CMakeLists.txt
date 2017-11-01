@@ -32,3 +32,8 @@ target_link_libraries(test_plane2 sr_plane)
 add_executable(test_floor test_floor.cpp)
 target_link_libraries(test_floor sr_plane sr_io sr_slam sr_slam_plane)
 
+# display extracted planes from point cloud data
+add_executable(test_view_extract_planes test_view_extract_planes.cpp)
+target_link_libraries(test_view_extract_planes sr_plane)
+
+

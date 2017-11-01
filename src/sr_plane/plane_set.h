@@ -23,9 +23,19 @@ class CPlaneSet
     template<typename PointT>
     int extractPlanes(boost::shared_ptr<pcl::PointCloud<PointT> > &in, double squared_dis_threshold = 0.005);
 
+    // extract planes and return plane points
+    template<typename PointT>
+    int extractPlanes(boost::shared_ptr<pcl::PointCloud<PointT> > &in, boost::shared_ptr<pcl::PointCloud<PointT> >& out, 
+        std::vector<int>& plane_num, double squared_dis_threshold = 0.005);
+
     template<typename PointT>
     void extractOutlier(boost::shared_ptr<pcl::PointCloud<PointT> > &in, boost::shared_ptr<pcl::PointCloud<PointT> > &out, 
         pcl::PointIndices::Ptr& inliers);
+
+    template<typename PointT>
+    void extractInlier(boost::shared_ptr<pcl::PointCloud<PointT> >& in, 
+          boost::shared_ptr<pcl::PointCloud<PointT> >& out, pcl::PointIndices::Ptr& inliers);
+
 
     // select floor 
     CPlane* selectFloor();
