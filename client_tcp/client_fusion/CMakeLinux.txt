@@ -1,0 +1,39 @@
+
+IF(CMAKE_BUILD_TYPE MATCHES "release")
+#release
+	set(CMAKE_CXX_FLAGS "-O3 -Wall -s")
+ELSE()
+#Debug
+	set(CMAKE_CXX_FLAGS "-g -W -Wall")
+ENDIF()
+
+
+#TO ENABLE THIS TO ADD GCOV TO THE CODE
+#代码覆盖率测试功能
+#set(SE_ENABLE_GCOV 1)
+
+if (SE_ENABLE_GCOV)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
+	set(LINK_GCOV "-fprofile-arcs -ftest-coverage")
+endif (SE_ENABLE_GCOV)
+
+set(NEED_UNIT_TEST 1)
+
+set(NORMAL_LIB 
+	${LINK_GCOV}
+	${NORMAL_INTER_LIB}
+	log4cpp 
+	protobuf
+	boost_thread 
+	pthread 
+	boost_date_time-mt 
+	boost_system-mt
+	boost_filesystem-mt
+)
+
+
+
+
+

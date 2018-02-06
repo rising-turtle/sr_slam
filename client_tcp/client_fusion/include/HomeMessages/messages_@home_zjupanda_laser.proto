@@ -1,0 +1,20 @@
+message Home_Beam {
+	required double angle = 1;
+	required double dist  = 2;
+}
+
+message Home_Range {
+	optional uint32 cycle = 1;
+	required uint32 laser_data_num = 2;
+	required double c_angle_min = 3;
+	required double c_angle_max = 4;
+	required double c_angle_step = 5;
+	required double c_device_pos_offset_x = 6;
+	required double c_device_pos_offset_y = 7;
+	required double c_device_pos_offset_a = 8;
+}
+
+message Home_Laser {
+	required Home_Range laser_range = 1;
+	repeated Home_Beam laser_data = 2;
+}

@@ -1,0 +1,33 @@
+IF(CMAKE_BUILD_TYPE MATCHES "release")
+LINK_DIRECTORIES(${${PROJECT_NAME}_SOURCE_DIR}/lib/Release)
+link_directories(${CMAKE_SOURCE_DIR}/lib/Debug)
+ELSE()
+LINK_DIRECTORIES(${${PROJECT_NAME}_SOURCE_DIR}/lib/Debug)
+link_directories(${CMAKE_SOURCE_DIR}/lib/Debug)
+ENDIF()
+
+IF(CMAKE_BUILD_TYPE MATCHES "release")
+
+
+set(NORMAL_LIB 
+	libprotobuf
+	log4cpp 
+	os_message 
+	os_node 
+	suro_rpc 
+	${NORMAL_INTER_LIB}	
+)
+
+ELSE()
+set(NORMAL_LIB 
+	libprotobufD 
+	log4cppD 
+	os_messageD 
+	os_nodeD 
+	suro_rpcD 
+	${NORMAL_INTER_LIB}
+)
+ENDIF()
+
+
+ADD_DEFINITIONS(-D_WIN32_WINNT=0x0501)

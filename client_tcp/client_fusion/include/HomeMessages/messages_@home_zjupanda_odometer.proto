@@ -1,0 +1,23 @@
+message Home_WheelsOmni {
+	required double w1 = 1;         // cm/s
+	required double w2 = 2;         // cm/s
+	required double w3 = 3;         // cm/s
+	required double w4 = 4;         // cm/s
+}
+ 
+message Home_VelocityOmni {
+	required double vx = 1;         // cm/s                
+	required double vy = 2;         // cm/s
+	required double w = 3;         // rad/s
+}
+ 
+message Home_Odometer {
+	required uint32 cycle = 1;         // cnt
+	required double x = 2;         // cm
+	required double y = 3;         // cm
+	required double angle  = 4;         // rad
+ 
+	optional Home_WheelsOmni wheels = 5;         // wheels
+	optional Home_VelocityOmni lv = 6;         // local
+	optional Home_VelocityOmni gv  = 7;         // global
+}
